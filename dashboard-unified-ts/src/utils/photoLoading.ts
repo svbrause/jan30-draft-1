@@ -69,7 +69,7 @@ export async function fetchClientFrontPhoto(clientId: string): Promise<any[] | n
 export async function batchFetchClientPhotos(
   clientIds: string[],
   providerId?: string
-): Promise<Map<string, any[]>> {
+): Promise<Map<string, string>> {
   if (!clientIds || clientIds.length === 0) {
     return new Map();
   }
@@ -83,7 +83,7 @@ export async function batchFetchClientPhotos(
   // Mark these as requested
   uniqueIds.forEach(id => photoRequestedIds.add(id));
   
-  const photoMap = new Map<string, any[]>();
+  const photoMap = new Map<string, string>();
   
   // For small batches (≤10), use OR formula (more efficient)
   if (uniqueIds.length <= 10) {
@@ -100,6 +100,14 @@ export async function batchFetchClientPhotos(
       records.forEach(record => {
         const frontPhoto = record.fields['Front Photo'] || record.fields['Front photo'];
         if (frontPhoto && Array.isArray(frontPhoto) && frontPhoto.length > 0) {
+          // Extract URL from Airtable attachment array
+          const photoUrl = typeof frontPhoto[0] === 'string' 
+            ? frontPhoto[0] 
+            : frontPhoto[0]?.url || frontPhoto[0]?.thumbnails?.large?.url || '';
+          if (photoUrl) {
+            photoMap.set(record.id, photoUrl);
+          }
+        } else if (frontPhoto && typeof frontPhoto === 'string') {
           photoMap.set(record.id, frontPhoto);
         }
       });
@@ -169,6 +177,14 @@ export async function batchFetchClientPhotos(
     allRecords.forEach(record => {
       const frontPhoto = record.fields['Front Photo'] || record.fields['Front photo'];
       if (frontPhoto && Array.isArray(frontPhoto) && frontPhoto.length > 0) {
+        // Extract URL from Airtable attachment array
+        const photoUrl = typeof frontPhoto[0] === 'string' 
+          ? frontPhoto[0] 
+          : frontPhoto[0]?.url || frontPhoto[0]?.thumbnails?.large?.url || '';
+        if (photoUrl) {
+          photoMap.set(record.id, photoUrl);
+        }
+      } else if (frontPhoto && typeof frontPhoto === 'string') {
         photoMap.set(record.id, frontPhoto);
       }
     });

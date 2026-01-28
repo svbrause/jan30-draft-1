@@ -1,8 +1,8 @@
 // Analysis Results Section Component - Complete Version
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Client } from '../../types';
-import { groupIssuesByArea, getIssueArea, issueToSuggestionMap } from '../../utils/issueMapping';
+import { issueToSuggestionMap, getIssueArea } from '../../utils/issueMapping';
 import './AnalysisResultsSection.css';
 
 interface AnalysisResultsSectionProps {
@@ -27,9 +27,9 @@ export default function AnalysisResultsSection({ client }: AnalysisResultsSectio
     interestedIssues = client.interestedIssues.split(',').map(i => i.trim()).filter(i => i);
   }
 
-  const patientGoals = Array.isArray(client.goals) 
-    ? client.goals 
-    : (typeof client.goals === 'string' ? client.goals.split(',').map(g => g.trim()) : []);
+  const patientGoals: string[] = Array.isArray(client.goals) 
+    ? (client.goals as string[])
+    : (typeof (client.goals as any) === 'string' && (client.goals as any) ? (client.goals as any as string).split(',').map((g: string) => g.trim()) : []);
 
   // Get actual focus areas
   const actualFocusAreas = new Set<string>();
@@ -72,7 +72,7 @@ export default function AnalysisResultsSection({ client }: AnalysisResultsSectio
   }
 
   // Find matching interests for an issue
-  const findMatchingInterests = (issue: string, issueArea: string): string[] => {
+  const findMatchingInterests = (issue: string, _issueArea: string): string[] => {
     const matchingInterests: string[] = [];
     const issueLower = issue.toLowerCase().trim();
     
@@ -103,7 +103,7 @@ export default function AnalysisResultsSection({ client }: AnalysisResultsSectio
   });
 
   if (actualFocusAreas.size === 0) {
-    patientGoals.forEach(goal => {
+    patientGoals.forEach((goal: string) => {
       const goalLower = goal.toLowerCase();
       if (goalLower.includes('lip') || goalLower.includes('lips')) focusAreas.add('Lips');
       if (goalLower.includes('eye') || goalLower.includes('eyes')) focusAreas.add('Eyes');

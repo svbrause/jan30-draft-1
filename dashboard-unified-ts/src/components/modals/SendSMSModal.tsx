@@ -1,10 +1,9 @@
 // Generic Send SMS Modal Component
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Client } from '../../types';
-import { useDashboard } from '../../context/DashboardContext';
 import { sendSMSNotification } from '../../services/api';
-import { isValidPhone, formatPhoneInput, cleanPhoneNumber } from '../../utils/validation';
+import { isValidPhone, cleanPhoneNumber } from '../../utils/validation';
 import { showToast, showError } from '../../utils/toast';
 import './SendSMSModal.css';
 
@@ -15,7 +14,6 @@ interface SendSMSModalProps {
 }
 
 export default function SendSMSModal({ client, onClose, onSuccess }: SendSMSModalProps) {
-  const { provider } = useDashboard();
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});

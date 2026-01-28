@@ -1,12 +1,12 @@
 // Kanban View Component
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useDashboard } from '../../context/DashboardContext';
 import { applyFilters, applySorting } from '../../utils/filtering';
 import { formatRelativeDate } from '../../utils/dateFormatting';
 import { updateClientStatus } from '../../services/contactHistory';
 import { showToast, showError } from '../../utils/toast';
-import { shouldLoadPhotoForClient, preloadVisiblePhotos } from '../../utils/photoLoading';
+import { preloadVisiblePhotos } from '../../utils/photoLoading';
 import ClientDetailModal from '../modals/ClientDetailModal';
 import './KanbanView.css';
 
@@ -31,7 +31,7 @@ export default function KanbanView() {
   };
 
   // Load photos for visible clients in Kanban using batch loading
-  React.useEffect(() => {
+  useEffect(() => {
     if (processedClients.length === 0 || !provider?.id) return;
 
     // Debounce photo loading
@@ -60,13 +60,13 @@ export default function KanbanView() {
     setSelectedClient(client);
   };
 
-  const handleDragStart = (e: React.DragEvent, clientId: string) => {
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, clientId: string) => {
     setDraggedClientId(clientId);
     e.dataTransfer.effectAllowed = 'move';
     e.currentTarget.classList.add('dragging');
   };
 
-  const handleDragEnd = (e: React.DragEvent) => {
+  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
     e.currentTarget.classList.remove('dragging');
     setDraggedClientId(null);
     document.querySelectorAll('.kanban-cards').forEach(col => {
@@ -74,16 +74,16 @@ export default function KanbanView() {
     });
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.currentTarget.classList.add('drag-over');
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.currentTarget.classList.remove('drag-over');
   };
 
-  const handleDrop = async (e: React.DragEvent, newStatus: typeof statuses[0]) => {
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>, newStatus: typeof statuses[0]) => {
     e.preventDefault();
     e.currentTarget.classList.remove('drag-over');
     

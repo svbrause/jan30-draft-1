@@ -1,6 +1,6 @@
 // Help Request Modal Component
 
-import React, { useState, FormEvent, useEffect } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useDashboard } from '../../context/DashboardContext';
 import { submitHelpRequest } from '../../services/api';
 import { isValidEmail } from '../../utils/validation';

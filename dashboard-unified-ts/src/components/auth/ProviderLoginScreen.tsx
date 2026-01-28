@@ -1,6 +1,6 @@
 // Provider Login Screen Component
 
-import React, { useState, FormEvent } from 'react';
+import { useState, FormEvent } from 'react';
 import { useDashboard } from '../../context/DashboardContext';
 import { fetchProviderByCode } from '../../services/api';
 import { saveProviderInfo, hasSeenWelcome, markWelcomeAsSeen } from '../../utils/providerStorage';
@@ -151,7 +151,6 @@ export default function ProviderLoginScreen() {
       
       {showWelcome && loggedInProvider && (
         <WelcomeModal 
-          provider={loggedInProvider}
           onClose={() => setShowWelcome(false)}
         />
       )}

@@ -1,7 +1,7 @@
 // Context for managing dashboard state
 
-import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
-import { Client, Provider, ViewType, FilterState, SortState } from '../types';
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { Client, Provider, ViewType, FilterState, SortState, ContactHistoryEntry } from '../types';
 import { fetchTableRecords, fetchContactHistory } from '../services/api';
 import { mapRecordToClient } from '../utils/clientMapper';
 
@@ -110,7 +110,7 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
           // Attach contact history to clients and set lastContact
           allClients = allClients.map(client => {
             const history = contactHistoryByLeadId[client.id] || [];
-            const sortedHistory = history.sort((a, b) => 
+            const sortedHistory = history.sort((a: ContactHistoryEntry, b: ContactHistoryEntry) => 
               new Date(b.date).getTime() - new Date(a.date).getTime()
             );
             const lastContact = sortedHistory.length > 0 ? sortedHistory[0].date : null;

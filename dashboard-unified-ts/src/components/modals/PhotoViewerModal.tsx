@@ -1,6 +1,6 @@
 // Photo Viewer Modal Component - Toggle between Front and Side photos
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Client } from '../../types';
 import { fetchTableRecords } from '../../services/api';
 import './PhotoViewerModal.css';

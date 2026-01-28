@@ -1,12 +1,10 @@
 // Header Component
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useDashboard } from '../../context/DashboardContext';
 import AddClientModal from '../modals/AddClientModal';
 import NewClientSMSModal from '../modals/NewClientSMSModal';
 import { getJotformUrl } from '../../utils/providerHelpers';
-import { splitName, cleanPhoneNumber } from '../../utils/validation';
-import { mapAreasToFormFields, mapSkinComplaints } from '../../utils/formMapping';
 import { showToast } from '../../utils/toast';
 import './Header.css';
 

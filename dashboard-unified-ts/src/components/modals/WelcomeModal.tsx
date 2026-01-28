@@ -1,17 +1,15 @@
 // Welcome Modal Component
 
-import React, { useEffect } from "react";
-import { Provider } from "../../types";
+import { useEffect } from "react";
 import "./WelcomeModal.css";
 
 const ponceLogo = "/src/assets/images/ponce logo.png";
 
 interface WelcomeModalProps {
-  provider: Provider;
   onClose: () => void;
 }
 
-export default function WelcomeModal({ provider, onClose }: WelcomeModalProps) {
+export default function WelcomeModal({ onClose }: WelcomeModalProps) {
   // Handle Escape key to close modal
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {

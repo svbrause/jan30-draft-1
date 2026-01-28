@@ -6,11 +6,12 @@ import ClientDetailPanel from './ClientDetailPanel';
 import PatientIssuesModal from '../modals/PatientIssuesModal';
 import Pagination from '../common/Pagination';
 import { formatRelativeDate } from '../../utils/dateFormatting';
-import { formatFacialStatus, getFacialStatusColor, getFacialStatusBorderColor } from '../../utils/statusFormatting';
+import { formatFacialStatus, getFacialStatusBorderColor } from '../../utils/statusFormatting';
 import { applyFilters, applySorting } from '../../utils/filtering';
-import { updateFacialAnalysisStatus } from '../../services/api';
-import { showToast, showError } from '../../utils/toast';
-import { shouldLoadPhotoForClient, preloadVisiblePhotos } from '../../utils/photoLoading';
+// Unused imports - kept for potential future drag-and-drop functionality
+// import { updateFacialAnalysisStatus } from '../../services/api';
+// import { showToast, showError } from '../../utils/toast';
+import { preloadVisiblePhotos } from '../../utils/photoLoading';
 import './FacialAnalysisView.css';
 
 export default function FacialAnalysisView() {
@@ -139,41 +140,43 @@ export default function FacialAnalysisView() {
     setDraggedClientId(null);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.currentTarget.classList.add('drag-over');
-  };
+  // Drag handlers - currently unused but kept for potential future drag-and-drop functionality
+  // const handleDragOver = (e: React.DragEvent) => {
+  //   e.preventDefault();
+  //   e.currentTarget.classList.add('drag-over');
+  // };
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.currentTarget.classList.remove('drag-over');
-  };
+  // const handleDragLeave = (e: React.DragEvent) => {
+  //   e.currentTarget.classList.remove('drag-over');
+  // };
 
-  const handleDrop = async (e: React.DragEvent, newStatus: string) => {
-    e.preventDefault();
-    e.currentTarget.classList.remove('drag-over');
-    
-    if (!draggedClientId) return;
-    
-    const client = clients.find(c => c.id === draggedClientId);
-    if (!client || client.tableSource !== 'Patients') {
-      setDraggedClientId(null);
-      if (client && client.tableSource === 'Web Popup Leads') {
-        showError('Web Popup Leads cannot be moved to other statuses. They must be in the Patients table first.');
-      }
-      return;
-    }
-
-    try {
-      const airtableStatus = newStatus === 'not-started' ? '' : newStatus;
-      await updateFacialAnalysisStatus(client.id, airtableStatus);
-      showToast(`Moved ${client.name} to ${formatFacialStatus(airtableStatus)}`);
-      refreshClients();
-    } catch (error: any) {
-      showError(error.message || 'Failed to update facial analysis status');
-    } finally {
-      setDraggedClientId(null);
-    }
-  };
+  // Drag and drop handler - currently unused but kept for potential future use
+  // const handleDrop = async (e: React.DragEvent, newStatus: string) => {
+  //   e.preventDefault();
+  //   e.currentTarget.classList.remove('drag-over');
+  //   
+  //   if (!draggedClientId) return;
+  //   
+  //   const client = clients.find(c => c.id === draggedClientId);
+  //   if (!client || client.tableSource !== 'Patients') {
+  //     setDraggedClientId(null);
+  //     if (client && client.tableSource === 'Web Popup Leads') {
+  //       showError('Web Popup Leads cannot be moved to other statuses. They must be in the Patients table first.');
+  //     }
+  //     return;
+  //   }
+  //
+  //   try {
+  //     const airtableStatus = newStatus === 'not-started' ? '' : newStatus;
+  //     await updateFacialAnalysisStatus(client.id, airtableStatus);
+  //     showToast(`Moved ${client.name} to ${formatFacialStatus(airtableStatus)}`);
+  //     refreshClients();
+  //   } catch (error: any) {
+  //     showError(error.message || 'Failed to update facial analysis status');
+  //   } finally {
+  //     setDraggedClientId(null);
+  //   }
+  // };
 
   if (loading) {
     return (
@@ -261,7 +264,7 @@ export default function FacialAnalysisView() {
           isPatient, 
           allIssues, 
           interestedIssues, 
-          whichRegions, 
+          whichRegions: _whichRegions, 
           skinComplaints, 
           processedAreas, 
           hasFacialAnalysisData, 

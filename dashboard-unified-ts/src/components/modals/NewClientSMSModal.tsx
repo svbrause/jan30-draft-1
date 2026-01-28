@@ -1,6 +1,6 @@
 // New Client SMS Modal Component (for Scan at Home)
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useDashboard } from '../../context/DashboardContext';
 import { sendSMSNotification } from '../../services/api';
 import { getTelehealthScanLink } from '../../utils/providerHelpers';
@@ -97,7 +97,6 @@ export default function NewClientSMSModal({ onClose, onSuccess }: NewClientSMSMo
   };
 
   const characterCount = formData.message.length;
-  const characterCountColor = characterCount > 160 ? '#f44336' : characterCount > 140 ? '#ff9800' : '#666';
 
   return (
     <div className="modal-overlay active" onClick={onClose}>

@@ -1,6 +1,6 @@
 // Client Detail Modal Component - Complete Version
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Client } from "../../types";
 import { formatDate, formatRelativeDate } from "../../utils/dateFormatting";
 import {

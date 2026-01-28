@@ -83,7 +83,7 @@ export function applySorting(clients: Client[], sort: SortState): Client[] {
     if (bVal === null || bVal === undefined) bVal = '';
 
     // Handle different data types
-    if (sort.field === 'name' || sort.field === 'phone' || sort.field === 'status' || sort.field === 'facialAnalysisStatus') {
+    if (sort.field === 'name' || sort.field === 'status' || sort.field === 'facialAnalysisStatus') {
       aVal = String(aVal || '').toLowerCase();
       bVal = String(bVal || '').toLowerCase();
     } else if (sort.field === 'age' || sort.field === 'photosLiked' || sort.field === 'photosViewed') {

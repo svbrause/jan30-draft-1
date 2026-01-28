@@ -10,7 +10,6 @@ import {
 import { updateLeadRecord } from "../../services/api";
 import {
   archiveClient,
-  updateClientStatus,
 } from "../../services/contactHistory";
 import { showToast, showError } from "../../utils/toast";
 import ContactHistorySection from "../modals/ContactHistorySection";
@@ -50,7 +49,8 @@ export default function ClientDetailPanel({
   const [editedClient, setEditedClient] = useState<Partial<Client> | null>(
     null,
   );
-  const [status, setStatus] = useState<Client["status"]>("new");
+  // Status state - kept for potential future use
+  // const [status, setStatus] = useState<Client["status"]>("new");
   const [showTelehealthSMS, setShowTelehealthSMS] = useState(false);
   const [showShareAnalysis, setShowShareAnalysis] = useState(false);
   const [showPhotoViewer, setShowPhotoViewer] = useState(false);
@@ -68,7 +68,7 @@ export default function ClientDetailPanel({
   useEffect(() => {
     if (client) {
       setEditedClient({ ...client });
-      setStatus(client.status);
+      // setStatus(client.status);
 
       // Load front photo if available and should be loaded
       let photoUrl: string | null = null;
@@ -207,16 +207,17 @@ export default function ClientDetailPanel({
     setIsEditMode(false);
   };
 
-  const handleStatusChange = async (newStatus: Client["status"]) => {
-    try {
-      await updateClientStatus(client, newStatus);
-      setStatus(newStatus);
-      showToast(`Status updated to ${newStatus}`);
-      onUpdate();
-    } catch (error: any) {
-      showError(error.message || "Failed to update status");
-    }
-  };
+  // Status change handler - currently unused but kept for potential future use
+  // const handleStatusChange = async (newStatus: Client["status"]) => {
+  //   try {
+  //     await updateClientStatus(client, newStatus);
+  //     setStatus(newStatus);
+  //     showToast(`Status updated to ${newStatus}`);
+  //     onUpdate();
+  //   } catch (error: any) {
+  //     showError(error.message || "Failed to update status");
+  //   }
+  // };
 
   const handleArchive = async () => {
     const action = client.archived ? "unarchive" : "archive";
@@ -302,12 +303,11 @@ export default function ClientDetailPanel({
           ? client.aestheticGoals.trim()
           : String(client.aestheticGoals).trim())) ||
       (client.concernsExplored &&
-        (typeof client.concernsExplored === "string"
-          ? client.concernsExplored.trim()
-          : Array.isArray(client.concernsExplored) &&
-              client.concernsExplored.length > 0
-            ? String(client.concernsExplored)
-            : String(client.concernsExplored))) ||
+        (Array.isArray(client.concernsExplored) && client.concernsExplored.length > 0
+          ? client.concernsExplored.join(', ')
+          : typeof client.concernsExplored === "string"
+            ? (client.concernsExplored as string).trim()
+            : String(client.concernsExplored || ''))) ||
       client.offerClaimed);
 
   const facialAnalysisFormHasData =

@@ -267,7 +267,7 @@ export async function sendSMSNotification(
  * Create a new lead/patient record
  */
 export async function createLeadRecord(
-  tableName: string,
+  _tableName: string,
   fields: Record<string, any>
 ): Promise<AirtableRecord> {
   const apiPath = USE_BACKEND_API

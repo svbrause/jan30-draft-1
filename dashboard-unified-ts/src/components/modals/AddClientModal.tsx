@@ -1,6 +1,6 @@
 // Add Client Modal Component
 
-import React, { useState, FormEvent, useEffect } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { createLeadRecord } from '../../services/api';
 import { isValidEmail, isValidPhone, isValidZipCode, formatPhoneInput, formatZipCodeInput } from '../../utils/validation';
 import { showToast, showError } from '../../utils/toast';

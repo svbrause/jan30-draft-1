@@ -1,6 +1,6 @@
 // Archived View Component
 
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useDashboard } from '../../context/DashboardContext';
 import ClientDetailModal from '../modals/ClientDetailModal';
 import Pagination from '../common/Pagination';

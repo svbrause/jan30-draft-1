@@ -1,6 +1,6 @@
 // View Controls Component (Search, Filters, Sort)
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useDashboard } from '../../context/DashboardContext';
 import './ViewControls.css';
 

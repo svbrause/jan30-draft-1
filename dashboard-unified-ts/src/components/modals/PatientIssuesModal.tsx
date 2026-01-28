@@ -1,9 +1,9 @@
 // Patient Issues Modal Component
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Client } from '../../types';
-import { formatDate, formatRelativeDate } from '../../utils/dateFormatting';
-import { getIssueArea, groupIssuesByArea, issueToSuggestionMap } from '../../utils/issueMapping';
+import { formatRelativeDate } from '../../utils/dateFormatting';
+import { issueToSuggestionMap, groupIssuesByArea } from '../../utils/issueMapping';
 import './PatientIssuesModal.css';
 
 interface PatientIssuesModalProps {
@@ -23,13 +23,13 @@ export default function PatientIssuesModal({ client, onClose }: PatientIssuesMod
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
 
-  // Parse issues
-  let allIssues: string[] = [];
-  if (Array.isArray(client.allIssues)) {
-    allIssues = client.allIssues.filter(i => i && i.trim());
-  } else if (typeof client.allIssues === 'string') {
-    allIssues = client.allIssues.split(',').map(i => i.trim()).filter(i => i);
-  }
+  // Parse issues - kept for potential future use
+  // let allIssues: string[] = [];
+  // if (Array.isArray(client.allIssues)) {
+  //   allIssues = client.allIssues.filter(i => i && i.trim());
+  // } else if (typeof client.allIssues === 'string') {
+  //   allIssues = client.allIssues.split(',').map(i => i.trim()).filter(i => i);
+  // }
 
   let interestedIssues: string[] = [];
   if (Array.isArray(client.interestedIssues)) {
@@ -38,9 +38,9 @@ export default function PatientIssuesModal({ client, onClose }: PatientIssuesMod
     interestedIssues = client.interestedIssues.split(',').map(i => i.trim()).filter(i => i);
   }
 
-  const patientGoals = Array.isArray(client.goals) 
-    ? client.goals 
-    : (typeof client.goals === 'string' ? client.goals.split(',').map(g => g.trim()) : []);
+  const patientGoals: string[] = Array.isArray(client.goals) 
+    ? (client.goals as string[])
+    : (typeof (client.goals as any) === 'string' && (client.goals as any) ? (client.goals as any as string).split(',').map((g: string) => g.trim()) : []);
 
   // Get actual focus areas
   const actualFocusAreas = new Set<string>();
@@ -98,7 +98,7 @@ export default function PatientIssuesModal({ client, onClose }: PatientIssuesMod
   });
 
   if (actualFocusAreas.size === 0) {
-    patientGoals.forEach(goal => {
+    patientGoals.forEach((goal: string) => {
       const goalLower = goal.toLowerCase();
       if (goalLower.includes('lip') || goalLower.includes('lips')) focusAreas.add('Lips');
       if (goalLower.includes('eye') || goalLower.includes('eyes')) focusAreas.add('Eyes');
@@ -193,7 +193,7 @@ export default function PatientIssuesModal({ client, onClose }: PatientIssuesMod
                       )}
                     </h3>
                     <ul className="patient-issues-list">
-                      {issues.map((issue, i) => {
+                      {issues.map((issue: string, i: number) => {
                         const isInterested = interestedSet.has(issue.toLowerCase());
                         const matchingInterests = findMatchingInterests(issue);
                         

@@ -1,7 +1,5 @@
 // Contact history utilities
 
-import { ContactHistoryEntry } from '../types';
-
 export function formatContactType(type: string): string {
   const labels: Record<string, string> = { 
     call: 'Phone Call', 

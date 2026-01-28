@@ -1,6 +1,6 @@
 // Telehealth SMS Modal Component
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Client } from '../../types';
 import { useDashboard } from '../../context/DashboardContext';
 import { sendSMSNotification } from '../../services/api';
@@ -85,7 +85,6 @@ export default function TelehealthSMSModal({ client, onClose, onSuccess }: Teleh
   };
 
   const characterCount = message.length;
-  const characterCountColor = characterCount > 160 ? '#f44336' : characterCount > 140 ? '#ff9800' : '#666';
 
   return (
     <div className="modal-overlay active" onClick={onClose}>

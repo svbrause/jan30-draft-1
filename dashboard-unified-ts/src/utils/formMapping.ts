@@ -1,7 +1,6 @@
 // Form field mapping utilities
 
 import { Client } from '../types';
-import { splitName, cleanPhoneNumber } from './validation';
 
 // Valid form field options
 export const VALID_WHAT_AREAS = ['Face', 'Skin', 'Body', 'Wellness'];

@@ -1,6 +1,6 @@
 // Contact History Section Component
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Client, ContactHistoryEntry } from '../../types';
 import { formatRelativeDate } from '../../utils/dateFormatting';
 import { formatFacialStatus } from '../../utils/statusFormatting';
@@ -204,7 +204,7 @@ export default function ContactHistorySection({ client, onUpdate }: ContactHisto
           <div className="no-data">No contact history yet. Add your first interaction!</div>
         ) : (
           allEntries.map((entry) => {
-            if (entry.type === 'facial-analysis') {
+            if ((entry.type as string) === 'facial-analysis') {
               return (
                 <div key={entry.id} className="contact-entry">
                   <div className="contact-entry-header">

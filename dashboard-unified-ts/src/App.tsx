@@ -1,8 +1,7 @@
 // Main App component
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DashboardProvider, useDashboard } from './context/DashboardContext';
-import { Provider } from './types';
 import { loadProviderInfo, clearProviderInfo } from './utils/providerStorage';
 import ProviderLoginScreen from './components/auth/ProviderLoginScreen';
 import DashboardLayout from './components/layout/DashboardLayout';

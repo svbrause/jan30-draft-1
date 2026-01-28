@@ -1,6 +1,6 @@
 // Pagination Component
 
-import React from 'react';
+// import React from 'react';
 import './Pagination.css';
 
 interface PaginationProps {
@@ -18,7 +18,7 @@ export default function Pagination({
   totalItems,
   itemsPerPage,
   onPageChange,
-  prefix = 'list',
+  prefix: _prefix = 'list', // Currently unused but kept for potential future use
 }: PaginationProps) {
   if (totalPages <= 1) return null;
 
