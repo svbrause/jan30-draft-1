@@ -1,17 +1,9 @@
 // API service for fetching data from Airtable via backend/Vercel API routes
 
-const AIRTABLE_BASE_ID = 
-  typeof window !== 'undefined' && (window as any).AIRTABLE_BASE_ID
-    ? (window as any).AIRTABLE_BASE_ID
-    : import.meta.env.VITE_AIRTABLE_BASE_ID || 'appXblSpAMBQskgzB';
-
-// Check for USE_BACKEND_API from environment variable or window object
-// Default to true for local development to use the backend API
-const USE_BACKEND_API = typeof window !== 'undefined' 
-  ? ((window as any).USE_BACKEND_API === true || import.meta.env.VITE_USE_BACKEND_API === 'true')
-  : import.meta.env.VITE_USE_BACKEND_API === 'true';
-
-const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL || 'https://ponce-patient-backend.vercel.app';
+// Use backend API proxy - all API calls go through secure backend
+// Frontend doesn't need to know Airtable base ID - backend handles it
+const USE_BACKEND_API = true; // Always use backend API proxy
+const BACKEND_API_URL = 'https://ponce-patient-backend.vercel.app';
 const API_BASE_URL = USE_BACKEND_API 
   ? BACKEND_API_URL 
   : (typeof window !== 'undefined' && window.location ? window.location.origin : '');
