@@ -954,12 +954,15 @@ body.theme-warm .kanban-cards.drag-over {
   background: white;
   border-radius: 16px;
   border: 1px solid #e8e8e8;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .leads-table {
   width: 100%;
+  min-width: 900px;
   border-collapse: collapse;
 }
 
@@ -980,6 +983,47 @@ body.theme-warm .kanban-cards.drag-over {
   border-bottom: 1px solid #e8e8e8;
   font-size: 14px;
   color: #424242;
+}
+
+/* iPad / tablet: narrower columns and padding so table fits better in landscape; container scrolls horizontally */
+@media (max-width: 1024px) {
+  .leads-table {
+    min-width: 720px;
+  }
+
+  .leads-table th {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+
+  .leads-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .table-lead-name {
+    font-size: 14px;
+  }
+
+  .table-lead-email {
+    font-size: 11px;
+  }
+
+  .status-select-inline {
+    min-width: 100px;
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  .interest-tag {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .leads-table .btn-secondary.btn-view {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
 }
 
 .leads-table tbody tr {

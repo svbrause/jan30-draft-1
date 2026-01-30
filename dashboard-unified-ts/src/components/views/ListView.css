@@ -16,12 +16,15 @@
   background: var(--theme-bg-card);
   border-radius: 12px;
   margin: 0;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
   box-shadow: 0 2px 8px var(--theme-shadow);
 }
 
 .leads-table {
   width: 100%;
+  min-width: 900px;
   border-collapse: collapse;
 }
 
