@@ -5,6 +5,7 @@ import { useDashboard } from '../../context/DashboardContext';
 import { sendSMSNotification } from '../../services/api';
 import { getTelehealthScanLink } from '../../utils/providerHelpers';
 import { isValidPhone, formatPhoneInput, splitName, cleanPhoneNumber } from '../../utils/validation';
+import { setBodyScrollLock } from '../../utils/scrollLock';
 import { showToast, showError } from '../../utils/toast';
 import './NewClientSMSModal.css';
 
@@ -33,6 +34,12 @@ export default function NewClientSMSModal({ onClose, onSuccess }: NewClientSMSMo
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
+
+  // Lock body scroll when modal is open (prevents iOS background scroll)
+  useEffect(() => {
+    setBodyScrollLock(true);
+    return () => setBodyScrollLock(false);
+  }, []);
 
   useEffect(() => {
     // Set default message

@@ -51,95 +51,7 @@ body {
   transition: background 0.3s ease;
 }
 
-/* Login Screen Styles - Overridden by ProviderLoginScreen.css */
-.login-screen {
-  min-height: 100vh;
-  height: 100vh;
-  background: var(--theme-bg-gradient);
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  margin: 0;
-  padding: 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.login-layout {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 100%;
-  min-height: 100vh;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  position: relative;
-}
-
-.login-banner {
-  position: relative;
-  background: #000;
-  overflow: hidden;
-  height: 50vh;
-  min-height: 50vh;
-  max-height: 50vh;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  flex-shrink: 0;
-  flex-grow: 0;
-}
-
-.banner-image {
-  width: 100%;
-  height: 100%;
-  min-width: 100%;
-  min-height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  padding: 0;
-}
-
-.login-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  background: var(--theme-bg-gradient);
-}
-
-.login-container {
-  background: var(--theme-bg-card);
-  border-radius: 20px;
-  padding: 48px;
-  max-width: 440px;
-  width: 100%;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--theme-border);
-}
-
-/* Responsive: Stack on narrow screens */
-@media (max-width: 968px) {
-  .login-layout {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-
-  .login-banner {
-    min-height: 300px;
-    max-height: 400px;
-  }
-
-  .login-content {
-    padding: 20px;
-  }
-}
+/* Login screen styles live in components/auth/ProviderLoginScreen.css */
 
 .login-header {
   text-align: center;
@@ -1460,10 +1372,15 @@ body.theme-warm .kanban-cards.drag-over {
   align-items: center;
   justify-content: center;
   padding: 20px;
+  overflow: hidden;
+  -webkit-overflow-scrolling: auto;
+  overscroll-behavior: contain;
 }
 
 .modal-overlay.active {
   display: flex;
+  /* Allow modal-body to scroll on iOS; body scroll is already locked by JS */
+  overflow: visible;
 }
 
 /* Full-screen modal for lead details */
@@ -1553,6 +1470,7 @@ body.theme-warm .kanban-cards.drag-over {
   border-radius: 20px;
   max-width: 800px;
   width: 100%;
+  height: 85vh;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
@@ -1625,8 +1543,16 @@ body.theme-warm .kanban-cards.drag-over {
 .modal-body {
   padding: 24px;
   overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
   min-height: 0;
+  /* Explicit max-height so the scroll container is bounded (fixes iOS + body scroll lock) */
+  max-height: calc(85vh - 100px);
+  /* iOS Safari touch scrolling; position for correct stacking/scroll context */
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 /* Responsive padding for modal body on wider screens */

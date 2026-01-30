@@ -5,6 +5,7 @@ import { Client } from '../../types';
 import { useDashboard } from '../../context/DashboardContext';
 import { sendSMSNotification } from '../../services/api';
 import { isValidPhone, formatPhoneInput, cleanPhoneNumber } from '../../utils/validation';
+import { setBodyScrollLock } from '../../utils/scrollLock';
 import { showToast, showError } from '../../utils/toast';
 import './ShareAnalysisModal.css';
 
@@ -34,6 +35,12 @@ export default function ShareAnalysisModal({ client, onClose, onSuccess }: Share
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
+
+  // Lock body scroll when modal is open (prevents iOS background scroll)
+  useEffect(() => {
+    setBodyScrollLock(true);
+    return () => setBodyScrollLock(false);
+  }, []);
 
   useEffect(() => {
     // Set default message

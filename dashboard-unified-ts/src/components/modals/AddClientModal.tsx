@@ -3,6 +3,7 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { createLeadRecord } from '../../services/api';
 import { isValidEmail, isValidPhone, isValidZipCode, formatPhoneInput, formatZipCodeInput } from '../../utils/validation';
+import { setBodyScrollLock } from '../../utils/scrollLock';
 import { showToast, showError } from '../../utils/toast';
 import './AddClientModal.css';
 
@@ -35,6 +36,12 @@ export default function AddClientModal({ onClose, onSuccess, providerId }: AddCl
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
+
+  // Lock body scroll when modal is open (prevents iOS background scroll)
+  useEffect(() => {
+    setBodyScrollLock(true);
+    return () => setBodyScrollLock(false);
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

@@ -7,6 +7,7 @@ import { sendSMSNotification } from '../../services/api';
 import { getTelehealthScanLink } from '../../utils/providerHelpers';
 import { splitName, cleanPhoneNumber } from '../../utils/validation';
 import { mapAreasToFormFields, mapSkinComplaints } from '../../utils/formMapping';
+import { setBodyScrollLock } from '../../utils/scrollLock';
 import { showToast, showError } from '../../utils/toast';
 import './TelehealthSMSModal.css';
 
@@ -32,6 +33,12 @@ export default function TelehealthSMSModal({ client, onClose, onSuccess }: Teleh
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
+
+  // Lock body scroll when modal is open (prevents iOS background scroll)
+  useEffect(() => {
+    setBodyScrollLock(true);
+    return () => setBodyScrollLock(false);
+  }, []);
 
   useEffect(() => {
     // Build default message

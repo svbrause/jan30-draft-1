@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { Client } from '../../types';
 import { formatRelativeDate } from '../../utils/dateFormatting';
 import { issueToSuggestionMap, groupIssuesByArea } from '../../utils/issueMapping';
+import { setBodyScrollLock } from '../../utils/scrollLock';
 import './PatientIssuesModal.css';
 
 interface PatientIssuesModalProps {
@@ -22,6 +23,12 @@ export default function PatientIssuesModal({ client, onClose }: PatientIssuesMod
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
+
+  // Lock body scroll when modal is open (prevents iOS background scroll)
+  useEffect(() => {
+    setBodyScrollLock(true);
+    return () => setBodyScrollLock(false);
+  }, []);
 
   // Parse issues - kept for potential future use
   // let allIssues: string[] = [];

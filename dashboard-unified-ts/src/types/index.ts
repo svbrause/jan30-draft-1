@@ -71,7 +71,18 @@ export interface Client {
   contactHistory: ContactHistoryEntry[];
 }
 
-export type ViewType = 'list' | 'cards' | 'kanban' | 'facial-analysis' | 'archived';
+export interface Offer {
+  id: string;
+  name: string;
+  heading: string;
+  details: string;
+  availableUntil: string;
+  redemptionPeriod: string;
+  treatmentFilter: string;
+  createdTime?: string;
+}
+
+export type ViewType = 'list' | 'cards' | 'kanban' | 'facial-analysis' | 'archived' | 'offers';
 
 export interface FilterState {
   source: string;

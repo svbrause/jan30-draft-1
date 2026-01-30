@@ -31,6 +31,7 @@ import {
   fetchClientFrontPhoto,
 } from "../../utils/photoLoading";
 import { formatPhoneInput, formatZipCodeInput } from "../../utils/validation";
+import { setBodyScrollLock } from "../../utils/scrollLock";
 import { useDashboard } from "../../context/DashboardContext";
 import "./ClientDetailModal.css";
 
@@ -107,6 +108,12 @@ export default function ClientDetailModal({
       }
     }
   }, [client]);
+
+  // Lock body scroll when modal is open (prevents iOS background scroll)
+  useEffect(() => {
+    setBodyScrollLock(true);
+    return () => setBodyScrollLock(false);
+  }, []);
 
   // Handle Escape key to close modal
   useEffect(() => {

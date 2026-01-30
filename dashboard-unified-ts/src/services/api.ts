@@ -3,7 +3,9 @@
 // Use backend API proxy - all API calls go through secure backend
 // Frontend doesn't need to know Airtable base ID - backend handles it
 const USE_BACKEND_API = true; // Always use backend API proxy
-const BACKEND_API_URL = 'https://ponce-patient-backend.vercel.app';
+const BACKEND_API_URL = import.meta.env.DEV 
+  ? 'http://localhost:3001' 
+  : 'https://ponce-patient-backend.vercel.app';
 const API_BASE_URL = USE_BACKEND_API 
   ? BACKEND_API_URL 
   : (typeof window !== 'undefined' && window.location ? window.location.origin : '');
@@ -293,7 +295,7 @@ export async function createLeadRecord(
 }
 
 /**
- * Submit help request
+ * Submit help request (creates a record in the Help Requests Airtable table)
  */
 export async function submitHelpRequest(
   name: string,
@@ -302,23 +304,25 @@ export async function submitHelpRequest(
   providerId: string
 ): Promise<boolean> {
   const apiPath = USE_BACKEND_API
-    ? `/api/dashboard/help-request`
+    ? `/api/dashboard/help-requests`
     : `/api/airtable-help-request`;
   const apiUrl = API_BASE_URL + apiPath;
-  
+
+  const fields: Record<string, string> = {
+    Name: name,
+    Email: email,
+    Message: message,
+    'Provider Id': providerId,
+  };
+
   const response = await fetch(apiUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      name,
-      email,
-      message,
-      providerId,
-    }),
+    body: JSON.stringify({ fields }),
   });
-  
+
   return response.ok;
 }
 
@@ -360,4 +364,22 @@ export async function updateFacialAnalysisStatus(
     const error = await safeJsonParse(response).catch(() => ({}));
     throw new Error(error.error?.message || error.message || 'Failed to update facial analysis status');
   }
+}
+
+/**
+ * Fetch offers from Airtable
+ */
+export async function fetchOffers(): Promise<any[]> {
+  const apiPath = `/api/dashboard/offers`;
+  const apiUrl = API_BASE_URL + apiPath;
+
+  const response = await fetch(apiUrl);
+
+  if (!response.ok) {
+    const errorData = await safeJsonParse(response).catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to fetch offers');
+  }
+
+  const data = await safeJsonParse(response);
+  return data.records || [];
 }

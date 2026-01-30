@@ -4,19 +4,24 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useDashboard } from '../../context/DashboardContext';
 import { submitHelpRequest } from '../../services/api';
 import { isValidEmail } from '../../utils/validation';
+import { setBodyScrollLock } from '../../utils/scrollLock';
 import { showToast, showError } from '../../utils/toast';
 import './HelpRequestModal.css';
 
 interface HelpRequestModalProps {
   onClose: () => void;
+  initialMessage?: string;
+  title?: string;
+  /** Optional instruction text shown above the form (e.g. for offer add/edit flow) */
+  instructionText?: string;
 }
 
-export default function HelpRequestModal({ onClose }: HelpRequestModalProps) {
+export default function HelpRequestModal({ onClose, initialMessage = '', title = 'Request Help', instructionText }: HelpRequestModalProps) {
   const { provider } = useDashboard();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: '',
+    message: initialMessage,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -31,6 +36,12 @@ export default function HelpRequestModal({ onClose }: HelpRequestModalProps) {
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
+
+  // Lock body scroll when modal is open (prevents iOS background scroll)
+  useEffect(() => {
+    setBodyScrollLock(true);
+    return () => setBodyScrollLock(false);
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -80,13 +91,18 @@ export default function HelpRequestModal({ onClose }: HelpRequestModalProps) {
       <div className="modal-content add-lead-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-header-info">
-            <h2 className="modal-title">Request Help</h2>
+            <h2 className="modal-title">{title}</h2>
           </div>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
+            {instructionText && (
+              <div className="help-request-instruction">
+                {instructionText}
+              </div>
+            )}
             <div className="form-group">
               <label htmlFor="help-request-name">Your Name *</label>
               <input
