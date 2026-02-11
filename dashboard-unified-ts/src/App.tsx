@@ -5,6 +5,7 @@ import { DashboardProvider, useDashboard } from "./context/DashboardContext";
 import { loadProviderInfo, clearProviderInfo } from "./utils/providerStorage";
 import ProviderLoginScreen from "./components/auth/ProviderLoginScreen";
 import DashboardLayout from "./components/layout/DashboardLayout";
+import DebugClientDetailPage from "./components/debug/DebugClientDetailPage";
 import "./styles/index.css";
 
 function AppContent() {
@@ -54,6 +55,16 @@ function AppContent() {
     return <ProviderLoginScreen />;
   }
 
+  const isDebug =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("debug") === "1";
+  if (isDebug) {
+    return (
+      <DashboardProvider>
+        <DebugClientDetailPage />
+      </DashboardProvider>
+    );
+  }
   return <DashboardLayout onLogout={handleLogout} />;
 }
 

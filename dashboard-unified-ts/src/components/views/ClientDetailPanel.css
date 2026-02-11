@@ -120,7 +120,9 @@
   flex-grow: 0 !important;
 }
 
-.client-detail-panel-body .modal-photo-placeholder-wrapper .photo-placeholder-container {
+.client-detail-panel-body
+  .modal-photo-placeholder-wrapper
+  .photo-placeholder-container {
   height: 240px !important;
   min-height: 240px !important;
   max-height: 240px !important;
@@ -180,6 +182,169 @@
   align-items: flex-start;
 }
 
+/* Contact subsection (label + Call/Email/SMS) */
+.contact-actions-subsection.contact-actions-bar {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--theme-border);
+  width: 100%;
+}
+
+.contact-subsection-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--theme-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.contact-info-block {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Online Treatment Finder section: always visible for all clients (Web Popup Leads and Patients) */
+.client-detail-panel-body .detail-section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--theme-border);
+}
+.client-detail-panel-body .detail-section-with-border {
+  border-top: 2px solid var(--theme-border);
+  padding-top: 20px;
+  margin-top: 20px;
+  background: var(--theme-bg-card, #fafafa);
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid var(--theme-accent);
+}
+.client-detail-panel-body .online-treatment-finder-section {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Lead submitted timestamp in Online Treatment Finder */
+.lead-submitted-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.lead-submitted-row .detail-label-small {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--theme-text-muted);
+  margin-bottom: 0;
+}
+.lead-submitted-row .detail-value {
+  font-size: 13px;
+  color: var(--theme-text);
+}
+
+/* Coupon section - always visible in Online Treatment Finder */
+.coupon-redemption-section.coupon-always-visible {
+  display: block !important;
+  visibility: visible !important;
+}
+.coupon-mark-claimed-actions {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--theme-border);
+}
+.coupon-helper-text {
+  font-size: 12px;
+  color: var(--theme-text-muted);
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+  max-width: 420px;
+}
+.coupon-redemption-section {
+  margin-bottom: 20px;
+  padding: 20px;
+  background: var(--theme-bg-card);
+  border: 1px solid var(--theme-border);
+  border-radius: 10px;
+  border-left: 4px solid var(--theme-accent);
+  box-shadow: 0 2px 6px var(--theme-shadow);
+}
+
+.coupon-redemption-section .detail-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--theme-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--theme-border);
+}
+
+.detail-grid-coupon {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 24px;
+  max-width: none;
+  margin-bottom: 4px;
+}
+
+.coupon-redemption-section .detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.coupon-redemption-section .detail-label-small {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--theme-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0;
+}
+
+.coupon-redemption-section .detail-value-small {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--theme-text-primary);
+}
+
+.coupon-redemption-section .coupon-status-earned,
+.coupon-redemption-section .coupon-status-claimed {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.coupon-redemption-section .coupon-status-earned.yes {
+  background: rgba(217, 200, 189, 0.35);
+  color: var(--theme-text-primary);
+}
+
+.coupon-redemption-section .coupon-status-earned.no {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--theme-text-muted);
+}
+
+.coupon-redemption-section .coupon-status-claimed.claimed {
+  background: var(--theme-accent);
+  color: var(--theme-text-primary);
+}
+
+.coupon-redemption-section .coupon-status-claimed.available {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--theme-text-secondary);
+}
+
+.coupon-mark-claimed-btn {
+  margin-top: 16px;
+}
+
 /* Contact actions bar - positioned below contact section */
 .contact-actions-bar {
   margin-top: 16px;
@@ -237,7 +402,7 @@
   background: white;
   border: 1px solid var(--theme-border);
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   width: auto;
   min-width: auto;

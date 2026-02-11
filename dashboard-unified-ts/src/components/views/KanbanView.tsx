@@ -1,33 +1,48 @@
 // Kanban View Component
 
-import React, { useMemo, useState, useEffect } from 'react';
-import { useDashboard } from '../../context/DashboardContext';
-import { applyFilters, applySorting } from '../../utils/filtering';
-import { formatRelativeDate } from '../../utils/dateFormatting';
-import { updateClientStatus } from '../../services/contactHistory';
-import { showToast, showError } from '../../utils/toast';
-import { preloadVisiblePhotos } from '../../utils/photoLoading';
-import ClientDetailModal from '../modals/ClientDetailModal';
-import './KanbanView.css';
+import React, { useMemo, useState, useEffect } from "react";
+import { useDashboard } from "../../context/DashboardContext";
+import { applyFilters, applySorting } from "../../utils/filtering";
+import { formatRelativeDate } from "../../utils/dateFormatting";
+import { updateClientStatus } from "../../services/contactHistory";
+import { showToast, showError } from "../../utils/toast";
+import { preloadVisiblePhotos } from "../../utils/photoLoading";
+import ClientDetailModal from "../modals/ClientDetailModal";
+import "./KanbanView.css";
 
 export default function KanbanView() {
-  const { clients, searchQuery, filters, sort, loading, refreshClients, provider } = useDashboard();
-  const [selectedClient, setSelectedClient] = useState<typeof clients[0] | null>(null);
+  const {
+    clients,
+    searchQuery,
+    filters,
+    sort,
+    loading,
+    refreshClients,
+    provider,
+  } = useDashboard();
+  const [selectedClient, setSelectedClient] = useState<
+    (typeof clients)[0] | null
+  >(null);
   const [draggedClientId, setDraggedClientId] = useState<string | null>(null);
   const [clientPhotos, setClientPhotos] = useState<Record<string, string>>({});
 
   // Filter and sort clients
   const processedClients = useMemo(() => {
-    let filtered = clients.filter(client => !client.archived);
+    let filtered = clients.filter((client) => !client.archived);
     filtered = applyFilters(filtered, filters, searchQuery);
     filtered = applySorting(filtered, sort);
     return filtered;
   }, [clients, filters, searchQuery, sort]);
 
-  const statuses: Array<'new' | 'contacted' | 'scheduled' | 'converted'> = ['new', 'contacted', 'scheduled', 'converted'];
+  const statuses: Array<"new" | "contacted" | "scheduled" | "converted"> = [
+    "new",
+    "contacted",
+    "scheduled",
+    "converted",
+  ];
 
-  const getClientsByStatus = (status: typeof statuses[0]) => {
-    return processedClients.filter(client => client.status === status);
+  const getClientsByStatus = (status: (typeof statuses)[0]) => {
+    return processedClients.filter((client) => client.status === status);
   };
 
   // Load photos for visible clients in Kanban using batch loading
@@ -39,57 +54,68 @@ export default function KanbanView() {
       await preloadVisiblePhotos(processedClients, provider.id);
       // Update local photo state from loaded client photos
       const updatedPhotos: Record<string, string> = {};
-      processedClients.forEach(client => {
-        if (client.frontPhoto && Array.isArray(client.frontPhoto) && client.frontPhoto.length > 0) {
+      processedClients.forEach((client) => {
+        if (
+          client.frontPhoto &&
+          Array.isArray(client.frontPhoto) &&
+          client.frontPhoto.length > 0
+        ) {
           const attachment = client.frontPhoto[0];
-          const url = attachment.thumbnails?.large?.url || 
-                     attachment.thumbnails?.full?.url ||
-                     attachment.url;
+          const url =
+            attachment.thumbnails?.large?.url ||
+            attachment.thumbnails?.full?.url ||
+            attachment.url;
           updatedPhotos[client.id] = url;
         }
       });
       if (Object.keys(updatedPhotos).length > 0) {
-        setClientPhotos(prev => ({ ...prev, ...updatedPhotos }));
+        setClientPhotos((prev) => ({ ...prev, ...updatedPhotos }));
       }
     }, 300);
 
     return () => clearTimeout(timeout);
   }, [processedClients, provider?.id]);
 
-  const handleCardClick = (client: typeof clients[0]) => {
+  const handleCardClick = (client: (typeof clients)[0]) => {
     setSelectedClient(client);
   };
 
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, clientId: string) => {
+  const handleDragStart = (
+    e: React.DragEvent<HTMLDivElement>,
+    clientId: string
+  ) => {
     setDraggedClientId(clientId);
-    e.dataTransfer.effectAllowed = 'move';
-    e.currentTarget.classList.add('dragging');
+    e.dataTransfer.effectAllowed = "move";
+    e.currentTarget.classList.add("dragging");
   };
 
   const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
-    e.currentTarget.classList.remove('dragging');
+    e.currentTarget.classList.remove("dragging");
     setDraggedClientId(null);
-    document.querySelectorAll('.kanban-cards').forEach(col => {
-      col.classList.remove('drag-over');
+    document.querySelectorAll(".kanban-cards").forEach((col) => {
+      col.classList.remove("drag-over");
     });
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    e.currentTarget.classList.add('drag-over');
+    e.currentTarget.classList.add("drag-over");
   };
 
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.currentTarget.classList.remove('drag-over');
+    e.currentTarget.classList.remove("drag-over");
   };
 
-  const handleDrop = async (e: React.DragEvent<HTMLDivElement>, newStatus: typeof statuses[0]) => {
+  const handleDrop = async (
+    e: React.DragEvent<HTMLDivElement>,
+    newStatus: (typeof statuses)[0]
+  ) => {
     e.preventDefault();
-    e.currentTarget.classList.remove('drag-over');
-    
+    e.currentTarget.classList.remove("drag-over");
+
     if (!draggedClientId) return;
-    
-    const client = clients.find(c => c.id === draggedClientId);
+
+    const client = clients.find((c) => c.id === draggedClientId);
     if (!client || client.status === newStatus) {
       setDraggedClientId(null);
       return;
@@ -100,7 +126,7 @@ export default function KanbanView() {
       showToast(`Moved ${client.name} to ${newStatus}`);
       refreshClients();
     } catch (error: any) {
-      showError(error.message || 'Failed to update status');
+      showError(error.message || "Failed to update status");
     } finally {
       setDraggedClientId(null);
     }
@@ -109,13 +135,13 @@ export default function KanbanView() {
   return (
     <section className="kanban-view">
       <div className="kanban-board">
-        {statuses.map(status => {
+        {statuses.map((status) => {
           const statusClients = getClientsByStatus(status);
           const statusLabels = {
-            new: 'New Clients',
-            contacted: 'Contacted',
-            scheduled: 'Consultation Scheduled',
-            converted: 'Converted',
+            new: "New Clients",
+            contacted: "Contacted",
+            scheduled: "Consultation Scheduled",
+            converted: "Converted",
           };
 
           return (
@@ -127,7 +153,7 @@ export default function KanbanView() {
                   <span className="column-count">{statusClients.length}</span>
                 </div>
               </div>
-              <div 
+              <div
                 className="kanban-cards"
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -143,14 +169,19 @@ export default function KanbanView() {
                     <p className="empty-state-text">No clients yet</p>
                   </div>
                 ) : (
-                  statusClients.map(client => {
+                  statusClients.map((client) => {
                     // Get photo URL from client data or loaded photos
                     let photoUrl: string | null = null;
-                    if (client.frontPhoto && Array.isArray(client.frontPhoto) && client.frontPhoto.length > 0) {
+                    if (
+                      client.frontPhoto &&
+                      Array.isArray(client.frontPhoto) &&
+                      client.frontPhoto.length > 0
+                    ) {
                       const attachment = client.frontPhoto[0];
-                      photoUrl = attachment.thumbnails?.large?.url || 
-                                attachment.thumbnails?.full?.url ||
-                                attachment.url;
+                      photoUrl =
+                        attachment.thumbnails?.large?.url ||
+                        attachment.thumbnails?.full?.url ||
+                        attachment.url;
                     } else if (clientPhotos[client.id]) {
                       photoUrl = clientPhotos[client.id];
                     }
@@ -158,7 +189,9 @@ export default function KanbanView() {
                     return (
                       <div
                         key={client.id}
-                        className={`client-card ${draggedClientId === client.id ? 'dragging' : ''}`}
+                        className={`client-card ${
+                          draggedClientId === client.id ? "dragging" : ""
+                        }`}
                         draggable
                         onDragStart={(e) => handleDragStart(e, client.id)}
                         onDragEnd={handleDragEnd}
@@ -166,7 +199,13 @@ export default function KanbanView() {
                       >
                         {photoUrl && (
                           <div className="lead-photo">
-                            <img src={photoUrl} alt={client.name} className="client-photo-img" draggable={false} loading="lazy" />
+                            <img
+                              src={photoUrl}
+                              alt={client.name}
+                              className="client-photo-img"
+                              draggable={false}
+                              loading="lazy"
+                            />
                           </div>
                         )}
                         <div className="lead-card-header">
@@ -174,19 +213,43 @@ export default function KanbanView() {
                             <div className="client-name">{client.name}</div>
                             <div className="lead-contact-info">
                               {client.phone && (
-                                <div className="lead-contact">Phone: {client.phone}</div>
+                                <div className="lead-contact">
+                                  Phone: {client.phone}
+                                </div>
                               )}
                               {client.email && (
-                                <div className="lead-contact">Email: {client.email.length > 22 ? client.email.substring(0, 20) + '...' : client.email}</div>
+                                <div className="lead-contact">
+                                  Email:{" "}
+                                  {client.email.length > 22
+                                    ? client.email.substring(0, 20) + "..."
+                                    : client.email}
+                                </div>
                               )}
                               {client.zipCode && (
-                                <div className="lead-contact">Zip: {client.zipCode}</div>
+                                <div className="lead-contact">
+                                  Zip: {client.zipCode}
+                                </div>
                               )}
                             </div>
                           </div>
                         </div>
                         <div className="lead-card-footer">
-                          <span className="lead-date">{formatRelativeDate(client.createdAt)}</span>
+                          <span className="lead-date">
+                            {formatRelativeDate(client.createdAt)}
+                          </span>
+                          {client.tableSource === "Web Popup Leads" && (
+                            <span
+                              className={
+                                client.offerClaimed
+                                  ? "coupon-pill coupon-pill-claimed"
+                                  : "coupon-pill coupon-pill-available"
+                              }
+                            >
+                              {client.offerClaimed
+                                ? "Coupon claimed"
+                                : "$50 available"}
+                            </span>
+                          )}
                         </div>
                       </div>
                     );
@@ -197,7 +260,7 @@ export default function KanbanView() {
           );
         })}
       </div>
-      
+
       {selectedClient && (
         <ClientDetailModal
           client={selectedClient}

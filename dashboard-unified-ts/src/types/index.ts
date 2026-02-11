@@ -4,10 +4,15 @@ export interface Provider {
   id: string;
   name: string;
   code: string;
-  logo?: string | Array<{ url: string; thumbnails?: { large?: { url: string }; full?: { url: string } } }>;
-  'Form Link'?: string;
+  logo?:
+    | string
+    | Array<{
+        url: string;
+        thumbnails?: { large?: { url: string }; full?: { url: string } };
+      }>;
+  "Form Link"?: string;
   FormLink?: string;
-  'Web Link'?: string;
+  "Web Link"?: string;
   WebLink?: string;
   JotformURL?: string;
   SCAN_FORM_URL?: string;
@@ -17,8 +22,17 @@ export interface Provider {
 export interface ContactHistoryEntry {
   id: string;
   leadId: string;
-  type: 'call' | 'email' | 'text' | 'meeting';
-  outcome: 'reached' | 'voicemail' | 'no-answer' | 'scheduled' | 'sent' | 'replied' | 'attended' | 'no-show' | 'cancelled';
+  type: "call" | "email" | "text" | "meeting";
+  outcome:
+    | "reached"
+    | "voicemail"
+    | "no-answer"
+    | "scheduled"
+    | "sent"
+    | "replied"
+    | "attended"
+    | "no-show"
+    | "cancelled";
   notes: string;
   date: string;
 }
@@ -47,8 +61,8 @@ export interface Client {
   photosViewed: number;
   treatmentsViewed: string[];
   source: string;
-  status: 'new' | 'contacted' | 'scheduled' | 'converted';
-  priority: 'high' | 'medium' | 'low';
+  status: "new" | "contacted" | "scheduled" | "converted";
+  priority: "high" | "medium" | "low";
   createdAt: string;
   notes: string;
   appointmentDate: string | null;
@@ -56,7 +70,7 @@ export interface Client {
   revenue: number | null;
   lastContact: string | null;
   isReal: boolean;
-  tableSource: 'Web Popup Leads' | 'Patients';
+  tableSource: "Web Popup Leads" | "Patients";
   facialAnalysisStatus: string | null;
   frontPhoto: string | null;
   frontPhotoLoaded: boolean;
@@ -67,6 +81,7 @@ export interface Client {
   processedAreasOfInterest: string;
   areasOfInterestFromForm: string;
   archived: boolean;
+  offerEarned: boolean;
   offerClaimed: boolean;
   contactHistory: ContactHistoryEntry[];
 }
@@ -82,7 +97,13 @@ export interface Offer {
   createdTime?: string;
 }
 
-export type ViewType = 'list' | 'cards' | 'kanban' | 'facial-analysis' | 'archived' | 'offers';
+export type ViewType =
+  | "list"
+  | "cards"
+  | "kanban"
+  | "facial-analysis"
+  | "archived"
+  | "offers";
 
 export interface FilterState {
   source: string;
@@ -93,8 +114,16 @@ export interface FilterState {
 }
 
 export interface SortState {
-  field: 'lastContact' | 'name' | 'age' | 'status' | 'facialAnalysisStatus' | 'photosLiked' | 'photosViewed' | 'createdAt';
-  order: 'asc' | 'desc';
+  field:
+    | "lastContact"
+    | "name"
+    | "age"
+    | "status"
+    | "facialAnalysisStatus"
+    | "photosLiked"
+    | "photosViewed"
+    | "createdAt";
+  order: "asc" | "desc";
 }
 
 export interface PaginationState {

@@ -15,6 +15,24 @@ export function formatDate(dateString: string | null): string {
   }
 }
 
+/** Format as explicit date and time (e.g. "Feb 9, 2025, 3:45 PM") for detail views */
+export function formatDateTime(dateString: string | null): string {
+  if (!dateString) return '—';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  } catch (e) {
+    return 'Invalid date';
+  }
+}
+
 export function formatRelativeDate(dateString: string | null): string {
   if (!dateString) return 'No activity yet';
   

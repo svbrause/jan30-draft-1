@@ -95,3 +95,26 @@
   outline: none;
   border-color: var(--theme-accent);
 }
+
+/* Coupon column badges - theme-aligned */
+.coupon-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.coupon-badge-available {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--theme-text-secondary);
+}
+
+.coupon-badge-claimed {
+  background: var(--theme-accent);
+  color: var(--theme-text-primary);
+}
+
+.table-coupon-na {
+  font-size: 13px;
+}

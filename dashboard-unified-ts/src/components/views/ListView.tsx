@@ -1,21 +1,24 @@
 // List View Component
 
-import { useState, useMemo } from 'react';
-import { useDashboard } from '../../context/DashboardContext';
-import ClientDetailPanel from './ClientDetailPanel';
-import Pagination from '../common/Pagination';
-import { formatRelativeDate } from '../../utils/dateFormatting';
-import { formatFacialStatus, getFacialStatusColor } from '../../utils/statusFormatting';
-import { applyFilters, applySorting } from '../../utils/filtering';
-import { showToast, showError } from '../../utils/toast';
-import './ListView.css';
+import { useState, useMemo } from "react";
+import { useDashboard } from "../../context/DashboardContext";
+import ClientDetailPanel from "./ClientDetailPanel";
+import Pagination from "../common/Pagination";
+import { formatRelativeDate } from "../../utils/dateFormatting";
+import {
+  formatFacialStatus,
+  getFacialStatusColor,
+} from "../../utils/statusFormatting";
+import { applyFilters, applySorting } from "../../utils/filtering";
+import { showToast, showError } from "../../utils/toast";
+import "./ListView.css";
 
 export default function ListView() {
-  const { 
-    clients, 
-    searchQuery, 
-    loading, 
-    error, 
+  const {
+    clients,
+    searchQuery,
+    loading,
+    error,
     refreshClients,
     filters,
     sort,
@@ -23,19 +26,21 @@ export default function ListView() {
     pagination,
     setPagination,
   } = useDashboard();
-  const [selectedClient, setSelectedClient] = useState<typeof clients[0] | null>(null);
+  const [selectedClient, setSelectedClient] = useState<
+    (typeof clients)[0] | null
+  >(null);
 
   // Filter and sort clients
   const processedClients = useMemo(() => {
     // Filter out archived clients
-    let filtered = clients.filter(client => !client.archived);
-    
+    let filtered = clients.filter((client) => !client.archived);
+
     // Apply filters
     filtered = applyFilters(filtered, filters, searchQuery);
-    
+
     // Apply sorting
     filtered = applySorting(filtered, sort);
-    
+
     return filtered;
   }, [clients, filters, searchQuery, sort]);
 
@@ -46,33 +51,37 @@ export default function ListView() {
     return processedClients.slice(startIndex, endIndex);
   }, [processedClients, pagination]);
 
-  const totalPages = Math.ceil(processedClients.length / pagination.itemsPerPage);
+  const totalPages = Math.ceil(
+    processedClients.length / pagination.itemsPerPage
+  );
 
-  const handleRowClick = (client: typeof clients[0]) => {
+  const handleRowClick = (client: (typeof clients)[0]) => {
     setSelectedClient(client);
   };
 
   const handleStatusChange = async (clientId: string, newStatus: string) => {
-    const client = clients.find(c => c.id === clientId);
+    const client = clients.find((c) => c.id === clientId);
     if (!client) return;
 
     try {
-      const { updateClientStatus } = await import('../../services/contactHistory');
+      const { updateClientStatus } = await import(
+        "../../services/contactHistory"
+      );
       await updateClientStatus(client, newStatus as any);
       showToast(`Status updated to ${newStatus}`);
       refreshClients();
     } catch (error: any) {
-      showError(error.message || 'Failed to update status');
+      showError(error.message || "Failed to update status");
     }
   };
 
   const handleColumnSort = (field: typeof sort.field) => {
     if (sort.field === field) {
       // Toggle sort order if clicking same column
-      setSort({ ...sort, order: sort.order === 'asc' ? 'desc' : 'asc' });
+      setSort({ ...sort, order: sort.order === "asc" ? "desc" : "asc" });
     } else {
       // New column, default to descending
-      setSort({ field, order: 'desc' });
+      setSort({ field, order: "desc" });
     }
     // Reset to page 1 when sorting
     setPagination({ ...pagination, currentPage: 1 });
@@ -80,7 +89,7 @@ export default function ListView() {
 
   const getSortIndicator = (field: typeof sort.field) => {
     if (sort.field !== field) return null;
-    return sort.order === 'asc' ? ' ↑' : ' ↓';
+    return sort.order === "asc" ? " ↑" : " ↓";
   };
 
   if (loading) {
@@ -102,8 +111,8 @@ export default function ListView() {
         <div className="leads-table-container">
           <div className="error-container">
             <p>Error loading clients: {error}</p>
-            <button 
-              onClick={() => window.location.reload()} 
+            <button
+              onClick={() => window.location.reload()}
               className="error-retry-button"
             >
               Retry
@@ -119,131 +128,166 @@ export default function ListView() {
       <div className="list-view-content">
         <div className="leads-table-container">
           <table className="leads-table">
-          <thead>
-            <tr>
-              <th 
-                onClick={() => handleColumnSort('name')}
-                className="table-header-sortable"
-                title="Click to sort by name"
-              >
-                Client{getSortIndicator('name')}
-              </th>
-              <th>Interests</th>
-              <th 
-                onClick={() => handleColumnSort('facialAnalysisStatus')}
-                className="table-header-sortable"
-                title="Click to sort by analysis status"
-              >
-                Analysis Status{getSortIndicator('facialAnalysisStatus')}
-              </th>
-              <th 
-                onClick={() => handleColumnSort('status')}
-                className="table-header-sortable"
-                title="Click to sort by lead stage"
-              >
-                Lead Stage{getSortIndicator('status')}
-              </th>
-              <th 
-                onClick={() => handleColumnSort('lastContact')}
-                className="table-header-sortable"
-                title="Click to sort by last activity"
-              >
-                Last Activity{getSortIndicator('lastContact')}
-              </th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
+            <thead>
               <tr>
-                <td colSpan={6} className="table-cell-center">
-                  <div className="spinner spinner-with-margin"></div>
-                  Loading clients...
-                </td>
+                <th
+                  onClick={() => handleColumnSort("name")}
+                  className="table-header-sortable"
+                  title="Click to sort by name"
+                >
+                  Client{getSortIndicator("name")}
+                </th>
+                <th>Interests</th>
+                <th
+                  onClick={() => handleColumnSort("facialAnalysisStatus")}
+                  className="table-header-sortable"
+                  title="Click to sort by analysis status"
+                >
+                  Analysis Status{getSortIndicator("facialAnalysisStatus")}
+                </th>
+                <th
+                  onClick={() => handleColumnSort("status")}
+                  className="table-header-sortable"
+                  title="Click to sort by lead stage"
+                >
+                  Lead Stage{getSortIndicator("status")}
+                </th>
+                <th
+                  onClick={() => handleColumnSort("lastContact")}
+                  className="table-header-sortable"
+                  title="Click to sort by last activity"
+                >
+                  Last Activity{getSortIndicator("lastContact")}
+                </th>
+                <th>Coupon</th>
+                <th>Actions</th>
               </tr>
-            ) : processedClients.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="table-cell-center">
-                  {clients.length === 0 ? 'No clients found' : 'No clients match your search'}
-                </td>
-              </tr>
-            ) : (
-              paginatedClients.map(client => (
-                <tr key={client.id} onClick={() => handleRowClick(client)} className="cursor-pointer">
-                  <td>
-                    <div className="table-lead-name">{client.name || 'N/A'}</div>
-                    <div className="table-lead-email">{client.email || ''}</div>
-                  </td>
-                  <td>
-                    <div className="interest-tags-container">
-                      {Array.isArray(client.goals) 
-                        ? client.goals.slice(0, 2).map((g, i) => (
-                            <span key={i} className="interest-tag interest-tag-sm">
-                              {g}
-                            </span>
-                          ))
-                        : null}
-                    </div>
-                  </td>
-                  <td>
-                    <span className="status-badge status-badge-base" style={{
-                      background: getFacialStatusColor(client.facialAnalysisStatus || null),
-                    }}>
-                      {formatFacialStatus(client.facialAnalysisStatus || null)}
-                    </span>
-                    {client.offerClaimed && (
-                      <div className="status-badge-offer">
-                        <span className="status-badge-offer-content">
-                          ✓ Offer Claimed
-                        </span>
-                      </div>
-                    )}
-                  </td>
-                  <td onClick={(e) => e.stopPropagation()}>
-                    <select
-                      className="status-select-inline"
-                      value={client.status}
-                      onChange={(e) => handleStatusChange(client.id, e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <option value="new">New Client</option>
-                      <option value="contacted">Contacted</option>
-                      <option value="scheduled">Scheduled</option>
-                      <option value="converted">Converted</option>
-                    </select>
-                  </td>
-                  <td className="text-sm text-muted">
-                    {formatRelativeDate(client.lastContact || client.createdAt)}
-                  </td>
-                  <td>
-                    <button 
-                      className="btn-secondary btn-view"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRowClick(client);
-                      }}
-                    >
-                      View
-                    </button>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="table-cell-center">
+                    <div className="spinner spinner-with-margin"></div>
+                    Loading clients...
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : processedClients.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="table-cell-center">
+                    {clients.length === 0
+                      ? "No clients found"
+                      : "No clients match your search"}
+                  </td>
+                </tr>
+              ) : (
+                paginatedClients.map((client) => (
+                  <tr
+                    key={client.id}
+                    onClick={() => handleRowClick(client)}
+                    className="cursor-pointer"
+                  >
+                    <td>
+                      <div className="table-lead-name">
+                        {client.name || "N/A"}
+                      </div>
+                      <div className="table-lead-email">
+                        {client.email || ""}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="interest-tags-container">
+                        {Array.isArray(client.goals)
+                          ? client.goals.slice(0, 2).map((g, i) => (
+                              <span
+                                key={i}
+                                className="interest-tag interest-tag-sm"
+                              >
+                                {g}
+                              </span>
+                            ))
+                          : null}
+                      </div>
+                    </td>
+                    <td>
+                      <span
+                        className="status-badge status-badge-base"
+                        style={{
+                          background: getFacialStatusColor(
+                            client.facialAnalysisStatus || null
+                          ),
+                        }}
+                      >
+                        {formatFacialStatus(
+                          client.facialAnalysisStatus || null
+                        )}
+                      </span>
+                    </td>
+                    <td onClick={(e) => e.stopPropagation()}>
+                      <select
+                        className="status-select-inline"
+                        value={client.status}
+                        onChange={(e) =>
+                          handleStatusChange(client.id, e.target.value)
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <option value="new">New Client</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="scheduled">Scheduled</option>
+                        <option value="converted">Converted</option>
+                      </select>
+                    </td>
+                    <td className="text-sm text-muted">
+                      {formatRelativeDate(
+                        client.lastContact || client.createdAt
+                      )}
+                    </td>
+                    <td>
+                      {client.tableSource === "Web Popup Leads" ? (
+                        client.offerClaimed ? (
+                          <span className="coupon-badge coupon-badge-claimed">
+                            Claimed
+                          </span>
+                        ) : (
+                          <span className="coupon-badge coupon-badge-available">
+                            Available
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-muted table-coupon-na">—</span>
+                      )}
+                    </td>
+                    <td>
+                      <button
+                        className="btn-secondary btn-view"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRowClick(client);
+                        }}
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-        
+
         {totalPages > 1 && (
           <Pagination
             currentPage={pagination.currentPage}
             totalPages={totalPages}
             totalItems={processedClients.length}
             itemsPerPage={pagination.itemsPerPage}
-            onPageChange={(page) => setPagination({ ...pagination, currentPage: page })}
+            onPageChange={(page) =>
+              setPagination({ ...pagination, currentPage: page })
+            }
           />
         )}
       </div>
-      
+
       {selectedClient && (
         <ClientDetailPanel
           client={selectedClient}

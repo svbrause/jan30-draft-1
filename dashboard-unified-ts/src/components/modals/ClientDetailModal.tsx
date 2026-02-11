@@ -2,12 +2,15 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Client } from "../../types";
-import { formatDate, formatRelativeDate } from "../../utils/dateFormatting";
+import { formatDate, formatDateTime, formatRelativeDate } from "../../utils/dateFormatting";
 import {
   formatFacialStatus,
   getFacialStatusColor,
 } from "../../utils/statusFormatting";
-import { updateLeadRecord } from "../../services/api";
+import {
+  updateLeadRecord,
+  updateWebPopupLeadCouponClaimed,
+} from "../../services/api";
 import {
   archiveClient,
   updateClientStatus,
@@ -49,14 +52,14 @@ export default function ClientDetailModal({
   const { provider } = useDashboard();
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedClient, setEditedClient] = useState<Partial<Client> | null>(
-    null,
+    null
   );
   const [status, setStatus] = useState<Client["status"]>("new");
   const [showTelehealthSMS, setShowTelehealthSMS] = useState(false);
   const [showShareAnalysis, setShowShareAnalysis] = useState(false);
   const [showPhotoViewer, setShowPhotoViewer] = useState(false);
   const [photoViewerType, setPhotoViewerType] = useState<"front" | "side">(
-    "front",
+    "front"
   );
   const [frontPhotoUrl, setFrontPhotoUrl] = useState<string | null>(null);
   const [photoLoading, setPhotoLoading] = useState(false);
@@ -151,8 +154,8 @@ export default function ClientDetailModal({
   const lastActivityRelative = client.lastContact
     ? formatRelativeDate(client.lastContact)
     : client.createdAt
-      ? formatRelativeDate(client.createdAt)
-      : "No activity yet";
+    ? formatRelativeDate(client.createdAt)
+    : "No activity yet";
 
   const handleSave = async () => {
     if (!editedClient || !client) return;
@@ -246,10 +249,10 @@ export default function ClientDetailModal({
       params.push(`faceRegions=${encodeURIComponent(faceRegions.join(","))}`);
     if (skinComplaints.length > 0)
       params.push(
-        `skinComplaints=${encodeURIComponent(skinComplaints.join(","))}`,
+        `skinComplaints=${encodeURIComponent(skinComplaints.join(","))}`
       );
     params.push(
-      `source=${encodeURIComponent("Provider Dashboard - In-Clinic Scan")}`,
+      `source=${encodeURIComponent("Provider Dashboard - In-Clinic Scan")}`
     );
 
     const formUrl = `${getJotformUrl(provider)}?${params.join("&")}`;
@@ -331,7 +334,14 @@ export default function ClientDetailModal({
         <div className="modal-body">
           {/* Contact Information Section */}
           <div
-            className={`detail-section modal-contact-section ${frontPhotoUrl || (!frontPhotoUrl && !photoLoading && client.tableSource === "Web Popup Leads") ? "modal-header-with-photo" : "modal-contact-section-base"}`}
+            className={`detail-section modal-contact-section ${
+              frontPhotoUrl ||
+              (!frontPhotoUrl &&
+                !photoLoading &&
+                client.tableSource === "Web Popup Leads")
+                ? "modal-header-with-photo"
+                : "modal-contact-section-base"
+            }`}
           >
             {frontPhotoUrl && (
               <div
@@ -416,7 +426,7 @@ export default function ClientDetailModal({
                   </div>
                 </div>
               )}
-            <div className="detail-section-relative">
+            <div className="detail-section-relative contact-top-right">
               {!isEditMode && (
                 <button
                   className="edit-toggle-btn"
@@ -435,137 +445,171 @@ export default function ClientDetailModal({
                   </svg>
                 </button>
               )}
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Email</label>
-                  {isEditMode ? (
-                    <input
-                      type="email"
-                      value={editedClient?.email || ""}
-                      onChange={(e) =>
-                        setEditedClient({
-                          ...editedClient,
-                          email: e.target.value,
-                        })
-                      }
-                      className="edit-input"
-                    />
-                  ) : (
-                    <div className="detail-value">{client.email || "N/A"}</div>
-                  )}
-                </div>
-                {client.phone && (
+              <div className="contact-info-block">
+                <div className="detail-grid">
                   <div className="detail-item">
-                    <label>Phone</label>
+                    <label>Email</label>
                     {isEditMode ? (
                       <input
-                        type="tel"
-                        value={editedClient?.phone || ""}
-                        onChange={(e) => {
-                          formatPhoneInput(e.target);
-                          setEditedClient({
-                            ...editedClient,
-                            phone: e.target.value,
-                          });
-                        }}
-                        className="edit-input"
-                      />
-                    ) : (
-                      <div className="detail-value">{client.phone}</div>
-                    )}
-                  </div>
-                )}
-                {client.ageRange && (
-                  <div className="detail-item">
-                    <label>Age Range</label>
-                    <div className="detail-value">{client.ageRange}</div>
-                  </div>
-                )}
-                {client.age && !client.ageRange && (
-                  <div className="detail-item">
-                    <label>Age</label>
-                    <div className="detail-value">{client.age} years old</div>
-                  </div>
-                )}
-                {client.dateOfBirth && (
-                  <div className="detail-item">
-                    <label>Date of Birth</label>
-                    <div className="detail-value">
-                      <span className="detail-value-date">
-                        {formatDate(client.dateOfBirth)}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                {client.source && (
-                  <div className="detail-item">
-                    <label>Source</label>
-                    {isEditMode ? (
-                      <select
-                        value={editedClient?.source || ""}
+                        type="email"
+                        value={editedClient?.email || ""}
                         onChange={(e) =>
                           setEditedClient({
                             ...editedClient,
-                            source: e.target.value,
+                            email: e.target.value,
                           })
                         }
                         className="edit-input"
-                      >
-                        <option value="Walk-in">Walk-in</option>
-                        <option value="Phone Call">Phone Call</option>
-                        <option value="Referral">Referral</option>
-                        <option value="Social Media">Social Media</option>
-                        <option value="Website">Website</option>
-                        <option value="AI Consult">AI Consult Tool</option>
-                        <option value="Other">Other</option>
-                      </select>
+                      />
                     ) : (
-                      <div className="detail-value">{client.source}</div>
+                      <div className="detail-value">
+                        {client.email || "N/A"}
+                      </div>
                     )}
                   </div>
-                )}
-                <div className="detail-item">
-                  <label>Zip Code</label>
-                  {isEditMode ? (
-                    <input
-                      type="text"
-                      value={editedClient?.zipCode || ""}
-                      onChange={(e) => {
-                        formatZipCodeInput(e.target);
-                        setEditedClient({
-                          ...editedClient,
-                          zipCode: e.target.value,
-                        });
-                      }}
-                      className="edit-input"
-                      maxLength={10}
-                    />
-                  ) : (
-                    <div className="detail-value">
-                      {client.zipCode || "Not provided"}
+                  {client.phone && (
+                    <div className="detail-item">
+                      <label>Phone</label>
+                      {isEditMode ? (
+                        <input
+                          type="tel"
+                          value={editedClient?.phone || ""}
+                          onChange={(e) => {
+                            formatPhoneInput(e.target);
+                            setEditedClient({
+                              ...editedClient,
+                              phone: e.target.value,
+                            });
+                          }}
+                          className="edit-input"
+                        />
+                      ) : (
+                        <div className="detail-value">{client.phone}</div>
+                      )}
                     </div>
                   )}
-                </div>
-                <div className="detail-item">
-                  <label>Status</label>
-                  <select
-                    value={status}
-                    onChange={(e) =>
-                      handleStatusChange(e.target.value as Client["status"])
-                    }
-                    className="detail-status-select-full"
-                  >
-                    <option value="new">New Client</option>
-                    <option value="contacted">Contacted</option>
-                    <option value="scheduled">Consultation Scheduled</option>
-                    <option value="converted">Converted</option>
-                  </select>
-                </div>
-                <div className="detail-item">
-                  <label>Last Activity</label>
-                  <div className="detail-value">{lastActivityRelative}</div>
+                  {client.ageRange && (
+                    <div className="detail-item">
+                      <label>Age Range</label>
+                      <div className="detail-value">{client.ageRange}</div>
+                    </div>
+                  )}
+                  {client.age && !client.ageRange && (
+                    <div className="detail-item">
+                      <label>Age</label>
+                      <div className="detail-value">{client.age} years old</div>
+                    </div>
+                  )}
+                  {client.dateOfBirth && (
+                    <div className="detail-item">
+                      <label>Date of Birth</label>
+                      <div className="detail-value">
+                        <span className="detail-value-date">
+                          {formatDate(client.dateOfBirth)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {client.source && (
+                    <div className="detail-item">
+                      <label>Source</label>
+                      {isEditMode ? (
+                        <select
+                          value={editedClient?.source || ""}
+                          onChange={(e) =>
+                            setEditedClient({
+                              ...editedClient,
+                              source: e.target.value,
+                            })
+                          }
+                          className="edit-input"
+                        >
+                          <option value="Walk-in">Walk-in</option>
+                          <option value="Phone Call">Phone Call</option>
+                          <option value="Referral">Referral</option>
+                          <option value="Social Media">Social Media</option>
+                          <option value="Website">Website</option>
+                          <option value="AI Consult">AI Consult Tool</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      ) : (
+                        <div className="detail-value">{client.source}</div>
+                      )}
+                    </div>
+                  )}
+                  <div className="detail-item">
+                    <label>Zip Code</label>
+                    {isEditMode ? (
+                      <input
+                        type="text"
+                        value={editedClient?.zipCode || ""}
+                        onChange={(e) => {
+                          formatZipCodeInput(e.target);
+                          setEditedClient({
+                            ...editedClient,
+                            zipCode: e.target.value,
+                          });
+                        }}
+                        className="edit-input"
+                        maxLength={10}
+                      />
+                    ) : (
+                      <div className="detail-value">
+                        {client.zipCode || "Not provided"}
+                      </div>
+                    )}
+                  </div>
+                  <div className="detail-item">
+                    <label>Status</label>
+                    <select
+                      value={status}
+                      onChange={(e) =>
+                        handleStatusChange(e.target.value as Client["status"])
+                      }
+                      className="detail-status-select-full"
+                    >
+                      <option value="new">New Client</option>
+                      <option value="contacted">Contacted</option>
+                      <option value="scheduled">Consultation Scheduled</option>
+                      <option value="converted">Converted</option>
+                    </select>
+                  </div>
+                  <div className="detail-item">
+                    <label>Last Activity</label>
+                    <div className="detail-value">{lastActivityRelative}</div>
+                  </div>
                 </div>
               </div>
+              {!isEditMode && (
+                <div className="contact-actions-subsection">
+                  <div className="detail-section-title contact-subsection-label">
+                    Contact
+                  </div>
+                  <div className="contact-actions-buttons">
+                    <button
+                      className="btn-secondary btn-sm"
+                      onClick={handleCall}
+                      disabled={!client.phone}
+                    >
+                      Call
+                    </button>
+                    <button
+                      className="btn-secondary btn-sm"
+                      onClick={handleEmail}
+                      disabled={!client.email}
+                    >
+                      Email
+                    </button>
+                    <button
+                      className="btn-secondary btn-sm"
+                      onClick={() => setShowSendSMS(true)}
+                      disabled={!client.phone}
+                    >
+                      SMS
+                    </button>
+                  </div>
+                </div>
+              )}
               {isEditMode && (
                 <div className="edit-actions">
                   <button
@@ -582,134 +626,173 @@ export default function ClientDetailModal({
             </div>
           </div>
 
-          {/* Web Popup Leads Form Section */}
-          {webPopupFormHasData && (
-            <div className="detail-section detail-section-with-border">
-              <div className="detail-section-title detail-section-title-flex">
-                <span>Online Treatment Finder</span>
+          {/* Online Treatment Finder: below contact; coupon state from Airtable "Coupons Claimed" for Web Popup Leads */}
+          <div
+            className="detail-section detail-section-with-border online-treatment-finder-section"
+            data-debug-section="online-treatment-finder"
+          >
+            <div className="detail-section-title detail-section-title-flex">
+              <span>Online Treatment Finder</span>
+            </div>
+            <div className="detail-section-spacing lead-submitted-row">
+              <label className="detail-label-small">Lead submitted</label>
+              <span className="detail-value">{formatDateTime(client.createdAt)}</span>
+            </div>
+            <div
+              className="detail-section-spacing coupon-redemption-section coupon-always-visible"
+              data-section="coupon"
+            >
+              <div className="detail-label">$50 Coupon</div>
+              <div className="detail-grid detail-grid-coupon">
+                <div className="detail-item">
+                  <label className="detail-label-small">Earned</label>
+                  <span
+                    className={`coupon-status-earned ${
+                      client.offerEarned ? "yes" : "no"
+                    }`}
+                  >
+                    {client.offerEarned ? "✓ Yes" : "No"}
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <label className="detail-label-small">Claimed</label>
+                  <span
+                    className={`coupon-status-claimed ${
+                      client.offerClaimed ? "claimed" : "available"
+                    }`}
+                  >
+                    {client.offerClaimed ? "✓ Redeemed" : "Available"}
+                  </span>
+                </div>
               </div>
-
-              {((typeof client.concerns === "string" &&
-                client.concerns.trim()) ||
-                (Array.isArray(client.concerns) &&
-                  client.concerns.length > 0) ||
-                (client.areas && client.areas.length > 0)) && (
-                <div className="detail-grid-custom">
+              {client.tableSource === "Web Popup Leads" &&
+                !client.offerClaimed && (
+                  <button
+                    type="button"
+                    className="btn-secondary btn-sm coupon-mark-claimed-btn"
+                    onClick={async () => {
+                      try {
+                        await updateWebPopupLeadCouponClaimed(client.id, true);
+                        showToast("Coupon marked as claimed");
+                        onUpdate();
+                      } catch (e: any) {
+                        showError(e.message || "Failed to update coupon");
+                      }
+                    }}
+                  >
+                    Mark as claimed
+                  </button>
+                )}
+            </div>
+            {client.tableSource === "Web Popup Leads" &&
+              webPopupFormHasData && (
+                <>
                   {((typeof client.concerns === "string" &&
                     client.concerns.trim()) ||
                     (Array.isArray(client.concerns) &&
-                      client.concerns.length > 0)) && (
-                    <div>
-                      <div className="detail-label">Concerns</div>
-                      <div className="detail-tags-container">
-                        {(typeof client.concerns === "string"
-                          ? client.concerns
-                              .split(",")
-                              .map((c) => c.trim())
-                              .filter((c) => c)
-                          : Array.isArray(client.concerns)
-                            ? client.concerns
-                            : []
-                        ).map((c, i) => (
-                          <span key={i} className="detail-tag">
-                            {c}
-                          </span>
-                        ))}
+                      client.concerns.length > 0) ||
+                    (client.areas && client.areas.length > 0)) && (
+                    <div className="detail-grid-custom">
+                      {((typeof client.concerns === "string" &&
+                        client.concerns.trim()) ||
+                        (Array.isArray(client.concerns) &&
+                          client.concerns.length > 0)) && (
+                        <div>
+                          <div className="detail-label">Concerns</div>
+                          <div className="detail-tags-container">
+                            {(typeof client.concerns === "string"
+                              ? client.concerns
+                                  .split(",")
+                                  .map((c) => c.trim())
+                                  .filter((c) => c)
+                              : Array.isArray(client.concerns)
+                              ? client.concerns
+                              : []
+                            ).map((c, i) => (
+                              <span key={i} className="detail-tag">
+                                {c}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {client.areas && client.areas.length > 0 && (
+                        <div>
+                          <div className="detail-label">Focus Areas</div>
+                          <div className="detail-tags-container">
+                            {(Array.isArray(client.areas)
+                              ? client.areas
+                              : [client.areas]
+                            ).map((a, i) => (
+                              <span key={i} className="detail-tag">
+                                {a}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {(client.skinType ||
+                    client.skinTone ||
+                    client.ethnicBackground) && (
+                    <div className="detail-section-spacing">
+                      <div className="detail-label">Demographics</div>
+                      <div className="detail-grid detail-grid-demographics">
+                        {client.skinType && (
+                          <div className="detail-item">
+                            <label className="detail-label-small">Skin Type</label>
+                            <div className="detail-value detail-value-small">
+                              {client.skinType && client.skinType.length > 0
+                                ? client.skinType.charAt(0).toUpperCase() +
+                                  client.skinType.slice(1)
+                                : client.skinType}
+                            </div>
+                          </div>
+                        )}
+                        {client.skinTone && (
+                          <div className="detail-item">
+                            <label className="detail-label-small">Skin Tone</label>
+                            <div className="detail-value detail-value-small">
+                              {client.skinTone && client.skinTone.length > 0
+                                ? client.skinTone.charAt(0).toUpperCase() +
+                                  client.skinTone.slice(1)
+                                : client.skinTone}
+                            </div>
+                          </div>
+                        )}
+                        {client.ethnicBackground && (
+                          <div className="detail-item">
+                            <label className="detail-label-small">Ethnic Background</label>
+                            <div className="detail-value detail-value-small">
+                              {client.ethnicBackground &&
+                              client.ethnicBackground.length > 0
+                                ? client.ethnicBackground
+                                    .charAt(0)
+                                    .toUpperCase() +
+                                  client.ethnicBackground.slice(1)
+                                : client.ethnicBackground}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
-                  {client.areas && client.areas.length > 0 && (
-                    <div>
-                      <div className="detail-label">Focus Areas</div>
-                      <div className="detail-tags-container">
-                        {(Array.isArray(client.areas)
-                          ? client.areas
-                          : [client.areas]
-                        ).map((a, i) => (
-                          <span key={i} className="detail-tag">
-                            {a}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {(client.skinType ||
-                client.skinTone ||
-                client.ethnicBackground) && (
-                <div className="detail-section-spacing">
-                  <div className="detail-label">Demographics</div>
-                  <div className="detail-grid detail-grid-demographics">
-                    {client.skinType && (
-                      <div className="detail-item">
-                        <label className="detail-label-small">Skin Type</label>
-                        <div className="detail-value detail-value-small">
-                          {client.skinType && client.skinType.length > 0
-                            ? client.skinType.charAt(0).toUpperCase() +
-                              client.skinType.slice(1)
-                            : client.skinType}
+                  {client.aestheticGoals &&
+                    (typeof client.aestheticGoals === "string"
+                      ? client.aestheticGoals.trim()
+                      : String(client.aestheticGoals).trim()) &&
+                    client.tableSource === "Web Popup Leads" && (
+                      <div className="detail-section-spacing">
+                        <div className="detail-label">Patient Goals</div>
+                        <div className="detail-goals-box">
+                          "{client.aestheticGoals}"
                         </div>
                       </div>
                     )}
-                    {client.skinTone && (
-                      <div className="detail-item">
-                        <label className="detail-label-small">Skin Tone</label>
-                        <div className="detail-value detail-value-small">
-                          {client.skinTone && client.skinTone.length > 0
-                            ? client.skinTone.charAt(0).toUpperCase() +
-                              client.skinTone.slice(1)
-                            : client.skinTone}
-                        </div>
-                      </div>
-                    )}
-                    {client.ethnicBackground && (
-                      <div className="detail-item">
-                        <label className="detail-label-small">
-                          Ethnic Background
-                        </label>
-                        <div className="detail-value detail-value-small">
-                          {client.ethnicBackground &&
-                          client.ethnicBackground.length > 0
-                            ? client.ethnicBackground.charAt(0).toUpperCase() +
-                              client.ethnicBackground.slice(1)
-                            : client.ethnicBackground}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                </>
               )}
-
-              {client.aestheticGoals &&
-                (typeof client.aestheticGoals === "string"
-                  ? client.aestheticGoals.trim()
-                  : String(client.aestheticGoals).trim()) &&
-                client.tableSource === "Web Popup Leads" && (
-                  <div className="detail-section-spacing">
-                    <div className="detail-label">Patient Goals</div>
-                    <div className="detail-goals-box">
-                      "{client.aestheticGoals}"
-                    </div>
-                  </div>
-                )}
-
-              {client.offerClaimed && (
-                <div className="detail-section-spacing">
-                  <div className="detail-label">Offer Status</div>
-                  <div className="detail-offer-claimed-box">
-                    <div className="detail-offer-claimed-content">
-                      <span className="detail-offer-claimed-icon">✓</span>
-                      <strong className="detail-offer-claimed-text">
-                        $50 Off Offer Claimed
-                      </strong>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          </div>
 
           {/* Facial Analysis Section */}
           <div className="detail-section detail-section-facial-analysis">
@@ -723,7 +806,7 @@ export default function ClientDetailModal({
                     className="status-badge detail-status-badge-dynamic"
                     style={{
                       background: getFacialStatusColor(
-                        client.facialAnalysisStatus,
+                        client.facialAnalysisStatus
                       ),
                     }}
                   >
@@ -891,30 +974,7 @@ export default function ClientDetailModal({
         </div>
 
         <div className="modal-footer">
-          <div className="modal-actions-left">
-            <button
-              className="btn-secondary"
-              onClick={handleCall}
-              disabled={!client.phone}
-            >
-              Call
-            </button>
-            <button
-              className="btn-secondary"
-              onClick={handleEmail}
-              disabled={!client.email}
-            >
-              Email
-            </button>
-            <button
-              className="btn-secondary"
-              onClick={() => setShowSendSMS(true)}
-              disabled={!client.phone}
-            >
-              SMS
-            </button>
-          </div>
-          <div className="modal-actions-right">
+          <div className="modal-actions-right modal-actions-right-only">
             <button className="btn-primary" onClick={onClose}>
               Close
             </button>

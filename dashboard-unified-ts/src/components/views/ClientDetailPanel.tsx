@@ -2,15 +2,16 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Client } from "../../types";
-import { formatDate, formatRelativeDate } from "../../utils/dateFormatting";
+import { formatDate, formatDateTime, formatRelativeDate } from "../../utils/dateFormatting";
 import {
   formatFacialStatus,
   getFacialStatusColor,
 } from "../../utils/statusFormatting";
-import { updateLeadRecord } from "../../services/api";
 import {
-  archiveClient,
-} from "../../services/contactHistory";
+  updateLeadRecord,
+  updateWebPopupLeadCouponClaimed,
+} from "../../services/api";
+import { archiveClient } from "../../services/contactHistory";
 import { showToast, showError } from "../../utils/toast";
 import ContactHistorySection from "../modals/ContactHistorySection";
 import AnalysisResultsSection from "../modals/AnalysisResultsSection";
@@ -47,7 +48,7 @@ export default function ClientDetailPanel({
   const { provider } = useDashboard();
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedClient, setEditedClient] = useState<Partial<Client> | null>(
-    null,
+    null
   );
   // Status state - kept for potential future use
   // const [status, setStatus] = useState<Client["status"]>("new");
@@ -55,7 +56,7 @@ export default function ClientDetailPanel({
   const [showShareAnalysis, setShowShareAnalysis] = useState(false);
   const [showPhotoViewer, setShowPhotoViewer] = useState(false);
   const [photoViewerType, setPhotoViewerType] = useState<"front" | "side">(
-    "front",
+    "front"
   );
   const [frontPhotoUrl, setFrontPhotoUrl] = useState<string | null>(null);
   const [photoLoading, setPhotoLoading] = useState(false);
@@ -168,8 +169,8 @@ export default function ClientDetailPanel({
   const lastActivityRelative = client.lastContact
     ? formatRelativeDate(client.lastContact)
     : client.createdAt
-      ? formatRelativeDate(client.createdAt)
-      : "No activity yet";
+    ? formatRelativeDate(client.createdAt)
+    : "No activity yet";
 
   const handleSave = async () => {
     if (!editedClient || !client) return;
@@ -269,10 +270,10 @@ export default function ClientDetailPanel({
       params.push(`faceRegions=${encodeURIComponent(faceRegions.join(","))}`);
     if (skinComplaints.length > 0)
       params.push(
-        `skinComplaints=${encodeURIComponent(skinComplaints.join(","))}`,
+        `skinComplaints=${encodeURIComponent(skinComplaints.join(","))}`
       );
     params.push(
-      `source=${encodeURIComponent("Provider Dashboard - In-Clinic Scan")}`,
+      `source=${encodeURIComponent("Provider Dashboard - In-Clinic Scan")}`
     );
 
     const formUrl = `${getJotformUrl(provider)}?${params.join("&")}`;
@@ -303,11 +304,12 @@ export default function ClientDetailPanel({
           ? client.aestheticGoals.trim()
           : String(client.aestheticGoals).trim())) ||
       (client.concernsExplored &&
-        (Array.isArray(client.concernsExplored) && client.concernsExplored.length > 0
-          ? client.concernsExplored.join(', ')
+        (Array.isArray(client.concernsExplored) &&
+        client.concernsExplored.length > 0
+          ? client.concernsExplored.join(", ")
           : typeof client.concernsExplored === "string"
-            ? (client.concernsExplored as string).trim()
-            : String(client.concernsExplored || ''))) ||
+          ? (client.concernsExplored as string).trim()
+          : String(client.concernsExplored || ""))) ||
       client.offerClaimed);
 
   const facialAnalysisFormHasData =
@@ -357,7 +359,14 @@ export default function ClientDetailPanel({
         <div className="client-detail-panel-body">
           {/* Contact Information Section */}
           <div
-            className={`detail-section modal-contact-section ${frontPhotoUrl || (!frontPhotoUrl && !photoLoading && client.tableSource === "Web Popup Leads") ? "modal-header-with-photo" : "modal-contact-section-base"}`}
+            className={`detail-section modal-contact-section ${
+              frontPhotoUrl ||
+              (!frontPhotoUrl &&
+                !photoLoading &&
+                client.tableSource === "Web Popup Leads")
+                ? "modal-header-with-photo"
+                : "modal-contact-section-base"
+            }`}
           >
             {frontPhotoUrl && (
               <div
@@ -442,7 +451,7 @@ export default function ClientDetailPanel({
                   </div>
                 </div>
               )}
-            <div className="detail-section-relative">
+            <div className="detail-section-relative contact-top-right">
               {!isEditMode && (
                 <button
                   className="edit-toggle-btn"
@@ -461,7 +470,7 @@ export default function ClientDetailPanel({
                   </svg>
                 </button>
               )}
-              <div className="contact-info-with-actions">
+              <div className="contact-info-block">
                 <div className="detail-grid">
                   <div className="detail-item">
                     <label>Email</label>
@@ -582,7 +591,10 @@ export default function ClientDetailPanel({
                 </div>
               </div>
               {!isEditMode && (
-                <div className="contact-actions-bar">
+                <div className="contact-actions-subsection contact-actions-bar">
+                  <div className="detail-section-title contact-subsection-label">
+                    Contact
+                  </div>
                   <div className="contact-actions-buttons">
                     <button
                       className="btn-secondary btn-sm"
@@ -624,134 +636,173 @@ export default function ClientDetailPanel({
             </div>
           </div>
 
-          {/* Web Popup Leads Form Section */}
-          {webPopupFormHasData && (
-            <div className="detail-section detail-section-with-border">
-              <div className="detail-section-title detail-section-title-flex">
-                <span>Online Treatment Finder</span>
+          {/* Online Treatment Finder: below contact; coupon state from Airtable "Coupons Claimed" for Web Popup Leads */}
+          <div
+            className="detail-section detail-section-with-border online-treatment-finder-section"
+            data-debug-section="online-treatment-finder"
+          >
+            <div className="detail-section-title detail-section-title-flex">
+              <span>Online Treatment Finder</span>
+            </div>
+            <div className="detail-section-spacing lead-submitted-row">
+              <label className="detail-label-small">Lead submitted</label>
+              <span className="detail-value">{formatDateTime(client.createdAt)}</span>
+            </div>
+            <div
+              className="detail-section-spacing coupon-redemption-section coupon-always-visible"
+              data-section="coupon"
+            >
+              <div className="detail-label">$50 Coupon</div>
+              <div className="detail-grid detail-grid-coupon">
+                <div className="detail-item">
+                  <label className="detail-label-small">Earned</label>
+                  <span
+                    className={`coupon-status-earned ${
+                      client.offerEarned ? "yes" : "no"
+                    }`}
+                  >
+                    {client.offerEarned ? "✓ Yes" : "No"}
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <label className="detail-label-small">Claimed</label>
+                  <span
+                    className={`coupon-status-claimed ${
+                      client.offerClaimed ? "claimed" : "available"
+                    }`}
+                  >
+                    {client.offerClaimed ? "✓ Redeemed" : "Available"}
+                  </span>
+                </div>
               </div>
-
-              {((typeof client.concerns === "string" &&
-                client.concerns.trim()) ||
-                (Array.isArray(client.concerns) &&
-                  client.concerns.length > 0) ||
-                (client.areas && client.areas.length > 0)) && (
-                <div className="detail-grid-custom">
+              {client.tableSource === "Web Popup Leads" &&
+                !client.offerClaimed && (
+                  <button
+                    type="button"
+                    className="btn-secondary btn-sm coupon-mark-claimed-btn"
+                    onClick={async () => {
+                      try {
+                        await updateWebPopupLeadCouponClaimed(client.id, true);
+                        showToast("Coupon marked as claimed");
+                        onUpdate();
+                      } catch (e: any) {
+                        showError(e.message || "Failed to update coupon");
+                      }
+                    }}
+                  >
+                    Mark as claimed
+                  </button>
+                )}
+            </div>
+            {client.tableSource === "Web Popup Leads" &&
+              webPopupFormHasData && (
+                <>
                   {((typeof client.concerns === "string" &&
                     client.concerns.trim()) ||
                     (Array.isArray(client.concerns) &&
-                      client.concerns.length > 0)) && (
-                    <div>
-                      <div className="detail-label">Concerns</div>
-                      <div className="detail-tags-container">
-                        {(typeof client.concerns === "string"
-                          ? client.concerns
-                              .split(",")
-                              .map((c) => c.trim())
-                              .filter((c) => c)
-                          : Array.isArray(client.concerns)
-                            ? client.concerns
-                            : []
-                        ).map((c, i) => (
-                          <span key={i} className="detail-tag">
-                            {c}
-                          </span>
-                        ))}
+                      client.concerns.length > 0) ||
+                    (client.areas && client.areas.length > 0)) && (
+                    <div className="detail-grid-custom">
+                      {((typeof client.concerns === "string" &&
+                        client.concerns.trim()) ||
+                        (Array.isArray(client.concerns) &&
+                          client.concerns.length > 0)) && (
+                        <div>
+                          <div className="detail-label">Concerns</div>
+                          <div className="detail-tags-container">
+                            {(typeof client.concerns === "string"
+                              ? client.concerns
+                                  .split(",")
+                                  .map((c) => c.trim())
+                                  .filter((c) => c)
+                              : Array.isArray(client.concerns)
+                              ? client.concerns
+                              : []
+                            ).map((c, i) => (
+                              <span key={i} className="detail-tag">
+                                {c}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {client.areas && client.areas.length > 0 && (
+                        <div>
+                          <div className="detail-label">Focus Areas</div>
+                          <div className="detail-tags-container">
+                            {(Array.isArray(client.areas)
+                              ? client.areas
+                              : [client.areas]
+                            ).map((a, i) => (
+                              <span key={i} className="detail-tag">
+                                {a}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {(client.skinType ||
+                    client.skinTone ||
+                    client.ethnicBackground) && (
+                    <div className="detail-section-spacing">
+                      <div className="detail-label">Demographics</div>
+                      <div className="detail-grid detail-grid-demographics">
+                        {client.skinType && (
+                          <div className="detail-item">
+                            <label className="detail-label-small">Skin Type</label>
+                            <div className="detail-value detail-value-small">
+                              {client.skinType && client.skinType.length > 0
+                                ? client.skinType.charAt(0).toUpperCase() +
+                                  client.skinType.slice(1)
+                                : client.skinType}
+                            </div>
+                          </div>
+                        )}
+                        {client.skinTone && (
+                          <div className="detail-item">
+                            <label className="detail-label-small">Skin Tone</label>
+                            <div className="detail-value detail-value-small">
+                              {client.skinTone && client.skinTone.length > 0
+                                ? client.skinTone.charAt(0).toUpperCase() +
+                                  client.skinTone.slice(1)
+                                : client.skinTone}
+                            </div>
+                          </div>
+                        )}
+                        {client.ethnicBackground && (
+                          <div className="detail-item">
+                            <label className="detail-label-small">Ethnic Background</label>
+                            <div className="detail-value detail-value-small">
+                              {client.ethnicBackground &&
+                              client.ethnicBackground.length > 0
+                                ? client.ethnicBackground
+                                    .charAt(0)
+                                    .toUpperCase() +
+                                  client.ethnicBackground.slice(1)
+                                : client.ethnicBackground}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
-                  {client.areas && client.areas.length > 0 && (
-                    <div>
-                      <div className="detail-label">Focus Areas</div>
-                      <div className="detail-tags-container">
-                        {(Array.isArray(client.areas)
-                          ? client.areas
-                          : [client.areas]
-                        ).map((a, i) => (
-                          <span key={i} className="detail-tag">
-                            {a}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {(client.skinType ||
-                client.skinTone ||
-                client.ethnicBackground) && (
-                <div className="detail-section-spacing">
-                  <div className="detail-label">Demographics</div>
-                  <div className="detail-grid detail-grid-demographics">
-                    {client.skinType && (
-                      <div className="detail-item">
-                        <label className="detail-label-small">Skin Type</label>
-                        <div className="detail-value detail-value-small">
-                          {client.skinType && client.skinType.length > 0
-                            ? client.skinType.charAt(0).toUpperCase() +
-                              client.skinType.slice(1)
-                            : client.skinType}
+                  {client.aestheticGoals &&
+                    (typeof client.aestheticGoals === "string"
+                      ? client.aestheticGoals.trim()
+                      : String(client.aestheticGoals).trim()) &&
+                    client.tableSource === "Web Popup Leads" && (
+                      <div className="detail-section-spacing">
+                        <div className="detail-label">Patient Goals</div>
+                        <div className="detail-goals-box">
+                          "{client.aestheticGoals}"
                         </div>
                       </div>
                     )}
-                    {client.skinTone && (
-                      <div className="detail-item">
-                        <label className="detail-label-small">Skin Tone</label>
-                        <div className="detail-value detail-value-small">
-                          {client.skinTone && client.skinTone.length > 0
-                            ? client.skinTone.charAt(0).toUpperCase() +
-                              client.skinTone.slice(1)
-                            : client.skinTone}
-                        </div>
-                      </div>
-                    )}
-                    {client.ethnicBackground && (
-                      <div className="detail-item">
-                        <label className="detail-label-small">
-                          Ethnic Background
-                        </label>
-                        <div className="detail-value detail-value-small">
-                          {client.ethnicBackground &&
-                          client.ethnicBackground.length > 0
-                            ? client.ethnicBackground.charAt(0).toUpperCase() +
-                              client.ethnicBackground.slice(1)
-                            : client.ethnicBackground}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                </>
               )}
-
-              {client.aestheticGoals &&
-                (typeof client.aestheticGoals === "string"
-                  ? client.aestheticGoals.trim()
-                  : String(client.aestheticGoals).trim()) &&
-                client.tableSource === "Web Popup Leads" && (
-                  <div className="detail-section-spacing">
-                    <div className="detail-label">Patient Goals</div>
-                    <div className="detail-goals-box">
-                      "{client.aestheticGoals}"
-                    </div>
-                  </div>
-                )}
-
-              {client.offerClaimed && (
-                <div className="detail-section-spacing">
-                  <div className="detail-label">Offer Status</div>
-                  <div className="detail-offer-claimed-box">
-                    <div className="detail-offer-claimed-content">
-                      <span className="detail-offer-claimed-icon">✓</span>
-                      <strong className="detail-offer-claimed-text">
-                        $50 Off Offer Claimed
-                      </strong>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          </div>
 
           {/* Facial Analysis Section */}
           <div className="detail-section detail-section-facial-analysis">
@@ -765,7 +816,7 @@ export default function ClientDetailPanel({
                     className="status-badge detail-status-badge-dynamic"
                     style={{
                       background: getFacialStatusColor(
-                        client.facialAnalysisStatus,
+                        client.facialAnalysisStatus
                       ),
                     }}
                   >
