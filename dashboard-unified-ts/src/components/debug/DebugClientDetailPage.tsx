@@ -16,7 +16,7 @@ import ClientDetailPanel from "../views/ClientDetailPanel";
 const DEBUG_RECORD_ID = "recVYfQmOGDfqZt6b";
 
 export default function DebugClientDetailPage() {
-  const { provider, setProvider, clients, refreshClients, loading, error } =
+  const { provider, setProvider, clients, refreshClients, loading } =
     useDashboard();
 
   // Load provider from storage (same as App) so debug page works after login
@@ -27,7 +27,7 @@ export default function DebugClientDetailPage() {
 
   const client = useMemo(
     () => clients.find((c) => c.id === DEBUG_RECORD_ID),
-    [clients]
+    [clients],
   );
 
   useEffect(() => {

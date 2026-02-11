@@ -11,6 +11,7 @@ import {
 } from "../../utils/statusFormatting";
 import { applyFilters, applySorting } from "../../utils/filtering";
 import { showToast, showError } from "../../utils/toast";
+import { updateClientStatus } from "../../services/contactHistory";
 import "./ListView.css";
 
 export default function ListView() {
@@ -64,9 +65,6 @@ export default function ListView() {
     if (!client) return;
 
     try {
-      const { updateClientStatus } = await import(
-        "../../services/contactHistory"
-      );
       await updateClientStatus(client, newStatus as any);
       showToast(`Status updated to ${newStatus}`);
       refreshClients();
