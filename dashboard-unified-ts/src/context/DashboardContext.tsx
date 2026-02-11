@@ -24,7 +24,9 @@ interface DashboardContextType {
   setLoading: (loading: boolean) => void;
   error: string | null;
   setError: (error: string | null) => void;
-  refreshClients: () => Promise<void>;
+  refreshClients: () => Promise<Client[]>;
+  /** Update one client in the cache (no refetch, no loading). Use for optimistic UI e.g. coupon claimed. */
+  updateClient: (clientId: string, patch: Partial<Client>) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -61,10 +63,10 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const refreshClients = useCallback(async () => {
+  const refreshClients = useCallback(async (): Promise<Client[]> => {
     if (!provider || !provider.id) {
       setClients([]);
-      return;
+      return [];
     }
 
     setLoading(true);
@@ -128,14 +130,22 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
       }
 
       setClients(allClients);
+      return allClients;
     } catch (err: any) {
       console.error('Failed to fetch clients:', err);
       setError(err.message || 'Failed to load clients');
       setClients([]);
+      return [];
     } finally {
       setLoading(false);
     }
   }, [provider]);
+
+  const updateClient = useCallback((clientId: string, patch: Partial<Client>) => {
+    setClients((prev) =>
+      prev.map((c) => (c.id === clientId ? { ...c, ...patch } : c))
+    );
+  }, []);
 
   // Load clients when provider changes
   useEffect(() => {
@@ -168,6 +178,7 @@ export function DashboardProvider({ children }: DashboardProviderProps) {
         error,
         setError,
         refreshClients,
+        updateClient,
       }}
     >
       {children}

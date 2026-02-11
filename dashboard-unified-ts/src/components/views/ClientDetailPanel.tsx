@@ -38,12 +38,15 @@ interface ClientDetailPanelProps {
   client: Client | null;
   onClose: () => void;
   onUpdate: () => void;
+  /** When provided, called after coupon is marked claimed so parent can update in place and keep panel open */
+  onCouponMarkedClaimed?: () => void;
 }
 
 export default function ClientDetailPanel({
   client,
   onClose,
   onUpdate,
+  onCouponMarkedClaimed,
 }: ClientDetailPanelProps) {
   const { provider } = useDashboard();
   const [isEditMode, setIsEditMode] = useState(false);
@@ -684,7 +687,11 @@ export default function ClientDetailPanel({
                       try {
                         await updateWebPopupLeadCouponClaimed(client.id, true);
                         showToast("Coupon marked as claimed");
-                        onUpdate();
+                        if (onCouponMarkedClaimed) {
+                          onCouponMarkedClaimed();
+                        } else {
+                          onUpdate();
+                        }
                       } catch (e: any) {
                         showError(e.message || "Failed to update coupon");
                       }

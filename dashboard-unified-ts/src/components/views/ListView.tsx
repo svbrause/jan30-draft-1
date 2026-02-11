@@ -21,6 +21,7 @@ export default function ListView() {
     loading,
     error,
     refreshClients,
+    updateClient,
     filters,
     sort,
     setSort,
@@ -290,7 +291,21 @@ export default function ListView() {
         <ClientDetailPanel
           client={selectedClient}
           onClose={() => setSelectedClient(null)}
-          onUpdate={refreshClients}
+          onCouponMarkedClaimed={() => {
+            if (selectedClient) {
+              updateClient(selectedClient.id, { offerClaimed: true });
+              setSelectedClient((prev) =>
+                prev ? { ...prev, offerClaimed: true } : null
+              );
+            }
+          }}
+          onUpdate={async () => {
+            const next = await refreshClients();
+            if (next?.length && selectedClient) {
+              const updated = next.find((c) => c.id === selectedClient.id);
+              if (updated) setSelectedClient(updated);
+            }
+          }}
         />
       )}
     </section>

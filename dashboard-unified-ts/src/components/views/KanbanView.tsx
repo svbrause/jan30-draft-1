@@ -18,6 +18,7 @@ export default function KanbanView() {
     sort,
     loading,
     refreshClients,
+    updateClient,
     provider,
   } = useDashboard();
   const [selectedClient, setSelectedClient] = useState<
@@ -265,9 +266,20 @@ export default function KanbanView() {
         <ClientDetailModal
           client={selectedClient}
           onClose={() => setSelectedClient(null)}
-          onUpdate={() => {
-            setSelectedClient(null);
-            // Refresh will be handled by context
+          onCouponMarkedClaimed={() => {
+            if (selectedClient) {
+              updateClient(selectedClient.id, { offerClaimed: true });
+              setSelectedClient((prev) =>
+                prev ? { ...prev, offerClaimed: true } : null
+              );
+            }
+          }}
+          onUpdate={async () => {
+            const next = await refreshClients();
+            if (next?.length && selectedClient) {
+              const updated = next.find((c) => c.id === selectedClient.id);
+              if (updated) setSelectedClient(updated);
+            }
           }}
         />
       )}

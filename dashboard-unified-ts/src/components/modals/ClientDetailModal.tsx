@@ -42,12 +42,15 @@ interface ClientDetailModalProps {
   client: Client | null;
   onClose: () => void;
   onUpdate: () => void;
+  /** When provided, called after coupon is marked claimed so parent can update in place and keep modal open */
+  onCouponMarkedClaimed?: () => void;
 }
 
 export default function ClientDetailModal({
   client,
   onClose,
   onUpdate,
+  onCouponMarkedClaimed,
 }: ClientDetailModalProps) {
   const { provider } = useDashboard();
   const [isEditMode, setIsEditMode] = useState(false);
@@ -674,7 +677,11 @@ export default function ClientDetailModal({
                       try {
                         await updateWebPopupLeadCouponClaimed(client.id, true);
                         showToast("Coupon marked as claimed");
-                        onUpdate();
+                        if (onCouponMarkedClaimed) {
+                          onCouponMarkedClaimed();
+                        } else {
+                          onUpdate();
+                        }
                       } catch (e: any) {
                         showError(e.message || "Failed to update coupon");
                       }
