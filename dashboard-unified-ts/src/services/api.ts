@@ -1,16 +1,9 @@
-// API service for fetching data from Airtable via backend/Vercel API routes
+// API service – all calls go to the backend (https://ponce-patient-backend.vercel.app/api/...)
+// No localhost or deprecated /api/airtable-* routes.
 
-// Use backend API proxy - all API calls go through secure backend
-// Frontend doesn't need to know Airtable base ID - backend handles it
-const USE_BACKEND_API = true; // Always use backend API proxy
-const BACKEND_API_URL =
+const API_BASE_URL =
   import.meta.env.VITE_BACKEND_API_URL ||
   "https://ponce-patient-backend.vercel.app";
-const API_BASE_URL = USE_BACKEND_API
-  ? BACKEND_API_URL
-  : typeof window !== "undefined" && window.location
-  ? window.location.origin
-  : "";
 
 export interface Provider {
   id: string;
@@ -58,12 +51,7 @@ async function safeJsonParse(response: Response): Promise<any> {
 export async function fetchProviderByCode(
   providerCode: string
 ): Promise<Provider> {
-  const apiPath = USE_BACKEND_API
-    ? `/api/dashboard/provider?providerCode=${encodeURIComponent(providerCode)}`
-    : `/api/airtable-get-provider?providerCode=${encodeURIComponent(
-        providerCode
-      )}`;
-  const apiUrl = API_BASE_URL + apiPath;
+  const apiUrl = `${API_BASE_URL}/api/dashboard/provider?providerCode=${encodeURIComponent(providerCode)}`;
 
   const response = await fetch(apiUrl);
 
@@ -106,10 +94,7 @@ export async function fetchTableRecords(
     });
   }
 
-  const apiPath = USE_BACKEND_API
-    ? `/api/dashboard/leads?${params.toString()}`
-    : `/api/airtable-get-leads?${params.toString()}`;
-  const apiUrl = API_BASE_URL + apiPath;
+  const apiUrl = `${API_BASE_URL}/api/dashboard/leads?${params.toString()}`;
 
   const response = await fetch(apiUrl, {
     method: "GET",
@@ -159,10 +144,7 @@ export async function fetchContactHistory(
     return [];
   }
 
-  const apiPath = USE_BACKEND_API
-    ? `/api/dashboard/contact-history?${params.toString()}`
-    : `/api/airtable-contact-history?${params.toString()}`;
-  const apiUrl = API_BASE_URL + apiPath;
+  const apiUrl = `${API_BASE_URL}/api/dashboard/contact-history?${params.toString()}`;
 
   const response = await fetch(apiUrl, {
     method: "GET",
@@ -282,10 +264,7 @@ export async function updateLeadRecord(
   params.append("recordId", recordId);
   params.append("tableName", tableName);
 
-  const apiPath = USE_BACKEND_API
-    ? `/api/dashboard/update-record`
-    : `/api/airtable-update-record`;
-  const apiUrl = API_BASE_URL + apiPath;
+  const apiUrl = `${API_BASE_URL}/api/dashboard/update-record`;
 
   const response = await fetch(apiUrl, {
     method: "POST",
@@ -311,10 +290,7 @@ export async function sendSMSNotification(
   leadId: string,
   tableSource: string
 ): Promise<boolean> {
-  const apiPath = USE_BACKEND_API
-    ? `/api/dashboard/sms`
-    : `/api/airtable-sms-notifications`;
-  const apiUrl = API_BASE_URL + apiPath;
+  const apiUrl = `${API_BASE_URL}/api/dashboard/sms`;
 
   const response = await fetch(apiUrl, {
     method: "POST",
@@ -339,10 +315,7 @@ export async function createLeadRecord(
   _tableName: string,
   fields: Record<string, any>
 ): Promise<AirtableRecord> {
-  const apiPath = USE_BACKEND_API
-    ? `/api/dashboard/leads`
-    : `/api/airtable-leads`;
-  const apiUrl = API_BASE_URL + apiPath;
+  const apiUrl = `${API_BASE_URL}/api/dashboard/leads`;
 
   const response = await fetch(apiUrl, {
     method: "POST",
@@ -372,10 +345,7 @@ export async function submitHelpRequest(
   message: string,
   providerId: string
 ): Promise<boolean> {
-  const apiPath = USE_BACKEND_API
-    ? `/api/dashboard/help-requests`
-    : `/api/airtable-help-request`;
-  const apiUrl = API_BASE_URL + apiPath;
+  const apiUrl = `${API_BASE_URL}/api/dashboard/help-requests`;
 
   const fields: Record<string, string> = {
     Name: name,
@@ -410,24 +380,13 @@ export async function updateFacialAnalysisStatus(
     "Pending/Opened": airtableStatus,
   };
 
-  const apiPath = USE_BACKEND_API
-    ? `/api/dashboard/records/Patients/${clientId}`
-    : `/api/airtable-update-record`;
-  const apiUrl = USE_BACKEND_API
-    ? API_BASE_URL + apiPath
-    : API_BASE_URL + apiPath;
-
-  const method = "PATCH";
-  const body = USE_BACKEND_API
-    ? JSON.stringify({ fields })
-    : JSON.stringify({ tableName: "Patients", recordId: clientId, fields });
-
+  const apiUrl = `${API_BASE_URL}/api/dashboard/records/Patients/${clientId}`;
   const response = await fetch(apiUrl, {
-    method,
+    method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    body,
+    body: JSON.stringify({ fields }),
   });
 
   if (!response.ok) {

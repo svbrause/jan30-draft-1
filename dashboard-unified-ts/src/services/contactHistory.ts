@@ -1,15 +1,9 @@
-// Contact history API service
+// Contact history API service – all requests go to the backend (no localhost/airtable fallback)
 
 import { Client } from '../types';
 
-const USE_BACKEND_API = typeof window !== 'undefined' 
-  ? ((window as any).USE_BACKEND_API === true || import.meta.env.VITE_USE_BACKEND_API === 'true')
-  : import.meta.env.VITE_USE_BACKEND_API === 'true';
-
-const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL || 'https://ponce-patient-backend.vercel.app';
-const API_BASE_URL = USE_BACKEND_API 
-  ? BACKEND_API_URL 
-  : (typeof window !== 'undefined' && window.location ? window.location.origin : '');
+const BACKEND_API_URL =
+  import.meta.env.VITE_BACKEND_API_URL || 'https://ponce-patient-backend.vercel.app';
 
 interface ContactLogEntry {
   type: 'call' | 'email' | 'text' | 'meeting';
@@ -49,10 +43,7 @@ export async function saveContactLog(
     'Date': new Date().toISOString()
   };
   
-  const apiPath = USE_BACKEND_API
-    ? `/api/dashboard/contact-history`
-    : `/api/airtable-contact-history`;
-  const apiUrl = API_BASE_URL + apiPath;
+  const apiUrl = `${BACKEND_API_URL}/api/dashboard/contact-history`;
   
   const response = await fetch(apiUrl, {
     method: 'POST',
@@ -89,26 +80,15 @@ export async function updateClientStatus(
   updateFields['Status'] = statusMap[newStatus] || newStatus;
   updateFields['Contacted'] = newStatus !== 'new';
   
-  const apiPath = USE_BACKEND_API
-    ? `/api/dashboard/records/${encodeURIComponent(tableName)}/${client.id}`
-    : `/api/airtable-update-record`;
-  const apiUrl = USE_BACKEND_API
-    ? API_BASE_URL + apiPath
-    : API_BASE_URL + apiPath;
-  
-  const method = USE_BACKEND_API ? 'PATCH' : 'PATCH';
-  const body = USE_BACKEND_API
-    ? JSON.stringify({ fields: updateFields })
-    : JSON.stringify({ tableName, recordId: client.id, fields: updateFields });
-  
+  const apiUrl = `${BACKEND_API_URL}/api/dashboard/records/${encodeURIComponent(tableName)}/${client.id}`;
   const response = await fetch(apiUrl, {
-    method,
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },
-    body,
+    body: JSON.stringify({ fields: updateFields }),
   });
-  
+
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     throw new Error(error.error?.message || error.message || 'Failed to update client status');
@@ -122,24 +102,13 @@ export async function archiveClient(
   const tableName = client.tableSource || 'Web Popup Leads';
   const fields = { Archived: archived };
   
-  const apiPath = USE_BACKEND_API
-    ? `/api/dashboard/records/${encodeURIComponent(tableName)}/${client.id}`
-    : `/api/airtable-update-record`;
-  const apiUrl = USE_BACKEND_API
-    ? API_BASE_URL + apiPath
-    : API_BASE_URL + apiPath;
-  
-  const method = 'PATCH';
-  const body = USE_BACKEND_API
-    ? JSON.stringify({ fields })
-    : JSON.stringify({ tableName, recordId: client.id, fields });
-  
+  const apiUrl = `${BACKEND_API_URL}/api/dashboard/records/${encodeURIComponent(tableName)}/${client.id}`;
   const response = await fetch(apiUrl, {
-    method,
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },
-    body,
+    body: JSON.stringify({ fields }),
   });
   
   if (!response.ok) {
